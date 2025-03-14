@@ -1,0 +1,135 @@
+// src/styles/themes.scss
+@use 'sass:map'; // Import the map module for map.get()
+
+$icon_small_size: 1.5rem;
+$icon_medium_size: 2.5rem;
+$icon_large_size: 3.5rem;
+
+// 1. Define theme-specific variables in a map
+$themes: (
+  "light": (
+    "bg-root-end": white,
+    "bg-root-start": white,
+    "heading-color": black,
+  ),
+  "dark": (
+    "bg-root-end": black,
+    "bg-root-start": rgb(0, 20, 20),
+    "heading-color": white,
+  )
+);
+
+// 2. Helper function to access theme properties using map.get
+@function t($props, $key) {
+  @return map.get($props, $key);
+}
+
+// 3. Define base classes once, extracting props at the top
+@mixin theme-classes($theme-name) {
+  $theme-props: map.get($themes, $theme-name); // Use map.get here
+
+  .app-#{$theme-name}-bg-root {
+    background: linear-gradient(to top left, t($theme-props, "bg-root-start"), t($theme-props, "bg-root-end"));
+
+  }  
+  .app-#{$theme-name}-heading-color {
+    color: t($theme-props, "heading-color") !important;
+  }
+}
+
+// 4. Loop through themes and apply the mixin
+@each $theme, $props in $themes {
+  @include theme-classes($theme);
+}
+
+//Other Custom CSS
+*{
+  font-family: "Atkinson Hyperlegible Next", sans-serif;
+  --bs-nav-pills-link-active-bg: var(--bs-border-color) !important;
+}
+
+body{
+  overflow: hidden;
+}
+
+.app-card {
+  padding: 1rem !important; //p-3 bootstrap
+}
+
+.app-card-title{
+  font-size: 1.25rem !important;  //fs-5 in bootstrap
+}
+
+.app-fs-sm{
+  font-size: 14px !important;
+}
+
+.app-text-theme{
+  color: var(--bs-body-color) !important; //use bootstrap theme colors
+}
+
+.nav-pills .nav-link.active{
+  font-weight: bold !important;
+}
+
+/**
+  py-1 equivalent
+*/
+.nav-pills .nav-link{
+  padding-top: .25rem !important;
+  padding-bottom: .25rem !important;
+  font-size: 14px !important;
+  color: var(--bs-body-color) !important;
+}
+
+.app-table th, .app-table td{
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  background: transparent !important;
+  
+}
+
+.app-table td:not([class^="text-"]), .app-table th:not([class^="text-"]){
+  color: var(--bs-body-color) !important;
+}
+
+.app-table th{
+  border-bottom: none !important;
+}
+
+.app-input-no-style{
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.app-hover-dull:hover{
+  opacity: 0.75 !important;
+}
+
+.app-hover-dull:active{
+  opacity: 0.25 !important;
+}
+
+.app-initials-profile-icon{
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500 !important;
+}
+
+.app-initials-profile-icon-sm{
+  min-height: $icon_small_size !important;
+  min-width: $icon_small_size !important;
+}
+
+.app-initials-profile-icon-md{
+  min-height: $icon_medium_size !important;
+  min-width: $icon_medium_size !important;
+}
+
+.app-initials-profile-icon-lg{
+  min-height: $icon_large_size !important;
+  min-width: $icon_large_size !important;
+}
