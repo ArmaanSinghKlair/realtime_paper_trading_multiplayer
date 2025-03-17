@@ -87,48 +87,121 @@ export const fillMissingCandles = ohlcDataArr =>{
   // If array is empty or has only one candle, return as is
   if (ohlcDataArr.length <= 1) return ohlcDataArr;
 
-  const filledArr = [];
+  let minsFilledArr = [];
   const ONE_MIN_MS = 60 * 1000;
 
-  // Add the first candle
-  filledArr.push(ohlcDataArr[0]);
-
-  // Loop through the candles starting from the second one
-  for (let i = 1; i < ohlcDataArr.length; i++) {
-      const prevCandle = ohlcDataArr[i - 1];
+  //===============================================================================================================================================
+  //SIMULATE Missing minute data. Does a linear interpolation between missing candles.
+  //===============================================================================================================================================
+  // minsFilledArr.push(ohlcDataArr[0]);
+  let prevMinCandle = 0;  //last candle we added to result
+  for (let i = 0; i < ohlcDataArr.length; i++) {
       const currentCandle = ohlcDataArr[i];
-
+      //if NO data or less than $10 change in the minute, simulate data (Don't use actual data)
+      if(currentCandle.high == currentCandle.low || Math.abs(currentCandle.high-currentCandle.low)<10){
+        continue;
+      }
       // Calculate time difference in milliseconds
-      const msDiff = currentCandle.timestamp - prevCandle.timestamp;
+      const msDiff = currentCandle.timestamp - prevMinCandle.timestamp;
       const missingMinutes = msDiff / ONE_MIN_MS - 1;
 
       // If there are missing candles
       if (missingMinutes > 0) {
+          let prevCandleClose = prevMinCandle.close; //prev close
+
           // Fill in the missing candles using linear interpolation
-          for (let j = 1; j <= missingMinutes; j++) {
-              const missingTimestamp = prevCandle.timestamp + (j * ONE_MIN_MS);
-              // const fraction = j / (missingMinutes + 1); // Fraction of the gap
-              const fraction = (50/missingMinutes)*(2*j-1)*0.01;
-              console.log('prevHigh',prevCandle.high, 'nextHigh', currentCandle.high, 'curJ = ', j, 'fraction=',fraction, 'missingMinsues: ',missingMinutes, '====finalHight=',interpolate(prevCandle.high, currentCandle.high, fraction))
+          for (let j = 0; j < missingMinutes; j++) {
+              const missingTimestamp = prevMinCandle.timestamp + ((j+1) * ONE_MIN_MS);
+              let priceDiff = Math.abs(currentCandle.open-prevMinCandle.close);
+              let curCandleClose = null;
+              let curCandleOpen = prevCandleClose;  //never changed anywhere. For reference
+              if(currentCandle.open >= prevMinCandle.close){
+                //green candles interpolation
+                curCandleClose = prevCandleClose + (priceDiff/missingMinutes)
+              } else{
+                //red candles interpolation
+                curCandleClose = prevCandleClose - (priceDiff/missingMinutes);
+              }
               // Linearly interpolate OHLC values
               const interpolatedCandle = {
                   timestamp: missingTimestamp,
-                  open: interpolate(prevCandle.open, currentCandle.open, fraction),
-                  high: interpolate(prevCandle.high, currentCandle.high, fraction),
-                  low: interpolate(prevCandle.low, currentCandle.low, fraction),
-                  close: interpolate(prevCandle.close, currentCandle.close, fraction),
+                  open: prevCandleClose,
+                  high: Math.max(curCandleOpen, curCandleClose) + priceDiff*(1/missingMinutes),
+                  low: Math.min(curCandleOpen, curCandleClose) - priceDiff*(1/missingMinutes),
+                  close: curCandleClose, //interpolate(prevCandle.close, currentCandle.close, fraction),
                   volume: 0, // Volume and trades still set to 0 for missing candles
                   trades: 0
               };
-              filledArr.push(interpolatedCandle);
+              minsFilledArr.push(interpolatedCandle);
+              prevCandleClose = curCandleClose;
           }
       }
 
       // Add the current candle
-      filledArr.push(currentCandle);
+      minsFilledArr.push(currentCandle);
+      prevMinCandle = currentCandle;
   }
+// console.log(minsFilledArr[0])
+  //===============================================================================================================================================
+  //Finally, simulate seconds. Does a linear interpolation of prices from OPEN -> HIGH -> LOW -> CLOSE. Eveything changes except 'open' price point.
+  //===============================================================================================================================================
+  const SECS_MIN = 60;
+  let secsFilledArr = [];
+  for (let i = 0; i < minsFilledArr.length; i++) {
+    let curMinsCandle = minsFilledArr[i];
+    //Total price diff to simulate sec-by-sec = open(0th sec) -> high -> low -> close(59th sec)
+    let totSecLen = (curMinsCandle.high-curMinsCandle.open) + (curMinsCandle.high-curMinsCandle.low) + (curMinsCandle.close-curMinsCandle.low);
+    let perSecChange = totSecLen/(SECS_MIN-1);
+    let curClose = curMinsCandle.open;
+    let curHigh = curClose;
+    let curLow = curClose;
+    let isPriceDec=false; //help in simulating prices going up to high -> down to low -> back up to close
 
-  return filledArr;
+    //////////////////TEST
+    if(i==1){
+      console.log('Tot Sec Len', totSecLen, 'perSecChange', perSecChange, curMinsCandle)
+    }
+    if(i==0){
+      secsFilledArr.push(curMinsCandle);
+      continue;
+    }
+    for(let sec=0;sec<SECS_MIN;sec++){
+      if(sec == SECS_MIN-1){
+        secsFilledArr.push(curMinsCandle);
+      } else{
+        secsFilledArr.push({
+          ...curMinsCandle,
+          open: curMinsCandle.open,
+          close: curClose,
+          high: curHigh,
+          low: curLow,
+        });
+
+        curClose = isPriceDec ? curClose-perSecChange : curClose+perSecChange;
+        //if simulated prices matches/overshoots high, bring it down to opp direction
+        if(curClose >= curMinsCandle.high){
+          isPriceDec = true;
+          curClose = curMinsCandle.high-(curClose-curMinsCandle.high);
+          curHigh = curMinsCandle.high;
+        } else if(curClose <= curMinsCandle.low){
+          //else if price drops below low, flip it upwards
+          isPriceDec = false;
+          curClose = curMinsCandle.low + (curMinsCandle.low-curClose);
+          curLow = curMinsCandle.low;
+        }
+        
+        curHigh = Math.max(curHigh, curClose);
+        curLow = Math.min(curLow, curClose);
+        curClose = curClose;
+        if(i==1){
+          console.log('curClose', curClose, 'isPriceDec', isPriceDec,secsFilledArr[secsFilledArr.length-1])
+          // console.log(isPriceDec,secsFilledArr[secsFilledArr.length-1])
+        }
+      }
+    }
+  }
+  // console.log(secsFilledArr.slice(10))
+  return secsFilledArr;
 }
 
 // Helper function for linear interpolation

@@ -6,9 +6,9 @@ export class CandlestickChart{
 	textColor = "#2A2E39";	//var(--bs-body-color)
 	gridLinesColor = '#EBEBEB';	//white theme = #EBEBEB, black = #1C1C1C
 	mouseHoverLinesColor = '#a2a2a2';	//BOTH themes= #9C9C9C
-	greenColor = '#099981';	//var(--bs-succcess-rgb)
-	redColor = '#F23645';	//var(--bs-danger-rgb)
-
+	greenColor = 'green';	//var(--bs-succcess-rgb)
+	redColor = 'red';	//var(--bs-danger-rgb)
+	blueColor = 'blue'
 	userSecPopoverBgColor = "#sF2F2F3";	//var(--bs-popover-bg)
 	userSecPopoverBorderColor = "rgba(0, 0, 0, 0.175)";	//var(--bs-popover-border-color)
 	userSecPopoverBorderRadius = 16;	//var(--bs-border-radius-xl)
@@ -32,7 +32,7 @@ export class CandlestickChart{
 	CHART_PL_PADDING = 50;
 	INTER_PL_BOX_PADDING = 25;
 	CHART_PL_BOX_HEIGHT = this.defaultTextFontSize + 5;
-
+	
 	//Tells if user has dragged the chart at least once. If not the chart automatically moves to the right.
 	isDragStart;
 
@@ -64,6 +64,8 @@ export class CandlestickChart{
 	prevDragOffset;	//keeps track of prev drag offset
 	mouseX;
 	mouseY;
+	curMinPrice; //current minPrice based on visible candlesticks
+	curMaxPrice; //current max price based on visible candlesticks
 
 	//actual HTML element where the chart will be drawn
 	chartContainerId;
@@ -271,6 +273,7 @@ export class CandlestickChart{
 		this.mouseHoverLinesColor = themeObj.mouseHoverLinesColor;
 		this.greenColor = themeObj.greenColor;
 		this.redColor = themeObj.redColor;
+		this.blueColor = themeObj.blueColor;
 
 		this.userSecPopoverBgColor = themeObj.userSecPopoverBgColor;
 		this.userSecPopoverBorderColor = themeObj.userSecPopoverBorderColor;
@@ -288,9 +291,13 @@ export class CandlestickChart{
 	 * Used to reload chart when new data comes in 
 	 */
 	updateLatestCandle(candleData){
-		//update price array
-		if(this.curOhlcDataArr.length >0 
-			&& candleData.timestamp == this.curOhlcDataArr[this.curOhlcDataArr.length-1].timestamp){
+		//initialize if null
+		if(!this.curOhlcDataArr){
+			this.curOhlcDataArr = [];	
+		}
+
+		//update latest candle OR push a new candle
+		if(this.curOhlcDataArr.length >0 && candleData.timestamp == this.curOhlcDataArr[this.curOhlcDataArr.length-1].timestamp){
 			this.curOhlcDataArr[this.curOhlcDataArr.length-1] = candleData;
 		} else{
 			this.curOhlcDataArr.push(candleData);
@@ -345,14 +352,14 @@ export class CandlestickChart{
 		
 		//generate new prices and y-axis points
 		let updatePricePointObj = this.#getYAxisPoints(maxPrice, minPrice);
-		let newMaxPrice = updatePricePointObj.newMax;
-		let newMinPrice = updatePricePointObj.newMin;
+		this.curMaxPrice = updatePricePointObj.newMax;
+		this.curMinPrice = updatePricePointObj.newMin;
 		let pricePoints = updatePricePointObj.yAxisPoints;
-		const priceRange = newMaxPrice - newMinPrice;
-		//console.log("max= ",newMaxPrice, "min = ", newMinPrice, "pricePoints= ", pricePoints);
+		const priceRange = this.curMaxPrice - this.curMinPrice;
+		//console.log("max= ",this.curMaxPrice, "min = ", this.curMinPrice, "pricePoints= ", pricePoints);
 		
 		// Draw axes
-		this.#drawBgGridLines(newMinPrice, newMaxPrice, pricePoints);
+		this.#drawBgGridLines(pricePoints);
 		
 		for (let i = this.lastCandlestickIndex; i >= firstCandlestickIndex; i--) {
 			let curCandleRightOffset = this.#getOffsetRightByCandlestick(i);
@@ -361,10 +368,10 @@ export class CandlestickChart{
 			
 
 			// Scale the prices to fit within the chart
-			const scaledHigh = Math.round(this.candlestickHeight - ((high - newMinPrice) / priceRange) * this.candlestickHeight);
-			const scaledLow = Math.round(this.candlestickHeight - ((low - newMinPrice) / priceRange) * this.candlestickHeight);
-			const scaledOpen = Math.round(this.candlestickHeight - ((open - newMinPrice) / priceRange) * this.candlestickHeight);
-			const scaledClose = Math.round(this.candlestickHeight - ((close - newMinPrice) / priceRange) * this.candlestickHeight);
+			let scaledHigh = Math.round(this.candlestickHeight - ((high - this.curMinPrice) / priceRange) * this.candlestickHeight);
+			let scaledLow = Math.round(this.candlestickHeight - ((low - this.curMinPrice) / priceRange) * this.candlestickHeight);
+			let scaledOpen = Math.round(this.candlestickHeight - ((open - this.curMinPrice) / priceRange) * this.candlestickHeight);
+			let scaledClose = Math.round(this.candlestickHeight - ((close - this.curMinPrice) / priceRange) * this.candlestickHeight);
 
 			const candlestickColor = this.#getCandlestickColor(open, close);
 			this.candleCtx.lineWidth=1;
@@ -383,7 +390,7 @@ export class CandlestickChart{
 			);
 		}
 
-		this.#drawUserSecurityHoldingInfo(newMinPrice, newMaxPrice);
+		this.#drawUserSecurityHoldingInfo();
 		// Draw mouse pointer dashed lines
 		this.#drawPointerLines();
 	}
@@ -481,8 +488,8 @@ export class CandlestickChart{
 		Draw Security info like current security price etc.
 		Needs to be above the candles.
 	*/
-	#drawUserSecurityHoldingInfo(minPrice, maxPrice){
-		let priceRange = maxPrice-minPrice;
+	#drawUserSecurityHoldingInfo(){
+		let priceRange = this.curMaxPrice-this.curMinPrice;
 		/**
 			Draw the latest price of security.
 			Draw all user's current position if 	any.
@@ -491,7 +498,7 @@ export class CandlestickChart{
 		this.userPLOutChartPosArr = [];	// {startY, endY, startX, endX}
 		for(let [userId, userSecPos] of this.userSecPosMap){
 			if(userSecPos.ownedQuantity && userSecPos.ownedQuantity != 0){
-				let isUserPosWithinChart = userSecPos.avgBuyPrice >= minPrice && userSecPos.avgBuyPrice <= maxPrice;
+				let isUserPosWithinChart = userSecPos.avgBuyPrice >= this.curMinPrice && userSecPos.avgBuyPrice <= this.curMaxPrice;
 
 				//Unrealized PL $ dimenstions. Length of string + 1 extra char padding on left & right.
 				let unrealizedPLText = userSecPos.unrealizedPL.toFixed(2)+" USD";
@@ -502,7 +509,7 @@ export class CandlestickChart{
 				
 
 				if(isUserPosWithinChart){
-					avgBuyPriceYPos = Math.floor(this.candlestickHeight - (((userSecPos.avgBuyPrice-minPrice)/priceRange) * this.candlestickHeight))+0.5;
+					avgBuyPriceYPos = Math.floor(this.candlestickHeight - (((userSecPos.avgBuyPrice-this.curMinPrice)/priceRange) * this.candlestickHeight))+0.5;
 				} else{
 					//put everything right at bottom
 					avgBuyPriceYPos = Math.floor(this.candlestickHeight - this.CHART_PL_BOX_HEIGHT/2)-5;
@@ -620,14 +627,14 @@ export class CandlestickChart{
 	/**
 		Draws background light-grey gridlines. Need to be below candles.
 	*/
-	#drawBgGridLines(minPrice, maxPrice, pricePoints) {
+	#drawBgGridLines(pricePoints) {
 		this.candleCtx.strokeStyle = this.gridLinesColor;
 		this.candleCtx.lineWidth = 1;
-		let priceRange = maxPrice-minPrice;
+		let priceRange = this.curMaxPrice-this.curMinPrice;
 		
 		// Draw Y-axis (price levels)           
 		for (let i = 0; i < pricePoints.length; i++) {
-			const y = Math.floor(this.candlestickHeight - (((pricePoints[i]-minPrice)/priceRange) * this.candlestickHeight))+0.5;
+			const y = Math.floor(this.candlestickHeight - (((pricePoints[i]-this.curMinPrice)/priceRange) * this.candlestickHeight))+0.5;
 			if((y<this.defaultTextFontSize)
 				|| (this.candlestickHeight-y < this.defaultTextFontSize)){
 				continue;
@@ -649,19 +656,43 @@ export class CandlestickChart{
 			this.yAxisCtx.fillText(price.toFixed(2), this.Y_AXIS_WIDTH/2, y);
 		}
 		
+		//Draw latest candle box on yaxis
+		if (this.curOhlcDataArr && this.curOhlcDataArr.length > 0){
+			let yAxisVal = this.curOhlcDataArr[this.curOhlcDataArr.length-1].close;
+			let yAxisPosVal= Math.floor(this.candlestickHeight - ((yAxisVal-this.curMinPrice)/priceRange) * this.candlestickHeight)+0.5;
+
+			this.yAxisCtx.fillStyle=this.blueColor;
+			this.yAxisCtx.fillRect(0,yAxisPosVal - (this.Y_AXIS_PRICE_BOX_HEIGHT/2), this.Y_AXIS_WIDTH, this.Y_AXIS_PRICE_BOX_HEIGHT);				
+			this.yAxisCtx.textAlign = "center";
+			this.yAxisCtx.textBaseline = "middle";
+			this.yAxisCtx.fillStyle = "white";
+			this.yAxisCtx.font = "400 "+this.defaultTextFontSize+"px "+this.chartFontFamily;
+			this.yAxisCtx.fillText(yAxisVal.toFixed(2), this.Y_AXIS_WIDTH/2, yAxisPosVal);
+
+			//draw a dotted line across
+			this.candleCtx.strokeStyle = this.blueColor;
+			this.candleCtx.lineWidth=1;
+			this.candleCtx.setLineDash([1, 3]);
+			this.candleCtx.beginPath();
+			this.candleCtx.moveTo(0, Math.round(yAxisPosVal)+0.5);
+			this.candleCtx.lineTo(this.candlestickCanvas.width, Math.round(yAxisPosVal)+0.5);
+			this.candleCtx.stroke();
+			this.candleCtx.setLineDash([]);
+		}
+
 		//show mouse hover point val
 		if (this.mouseX && this.mouseY) {
-			let yAxisHoverVal = maxPrice - (priceRange * (this.mouseY/this.candlestickHeight));
+			let yAxisHoverVal = this.curMaxPrice - (priceRange * (this.mouseY/this.candlestickHeight));
 			
 			this.yAxisCtx.fillStyle=this.textColor;
 			this.yAxisCtx.fillRect(0,this.mouseY - (this.Y_AXIS_PRICE_BOX_HEIGHT/2), this.Y_AXIS_WIDTH, this.Y_AXIS_PRICE_BOX_HEIGHT);				
 			this.yAxisCtx.textAlign = "center";
 			this.yAxisCtx.textBaseline = "middle";
-			this.yAxisCtx.fillStyle = "white";
+			this.yAxisCtx.fillStyle = this.gridLinesColor;
 			this.yAxisCtx.font = "400 "+this.defaultTextFontSize+"px "+this.chartFontFamily;
 			this.yAxisCtx.fillText(yAxisHoverVal.toFixed(2), this.Y_AXIS_WIDTH/2, this.mouseY);
 		}
-		
+
 		// Draw X-axis (time intervals)
 		let xAxisPointsNum = Math.ceil(this.candlestickChartWidth/this.xAxisPeriodWidth);
 		
