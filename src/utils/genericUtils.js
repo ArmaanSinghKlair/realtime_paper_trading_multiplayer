@@ -159,7 +159,7 @@ export const fillMissingCandles = ohlcDataArr =>{
 
     //////////////////TEST
     if(i==1){
-      console.log('Tot Sec Len', totSecLen, 'perSecChange', perSecChange, curMinsCandle)
+      // console.log('Tot Sec Len', totSecLen, 'perSecChange', perSecChange, curMinsCandle)
     }
     if(i==0){
       secsFilledArr.push(curMinsCandle);
@@ -194,8 +194,7 @@ export const fillMissingCandles = ohlcDataArr =>{
         curLow = Math.min(curLow, curClose);
         curClose = curClose;
         if(i==1){
-          console.log('curClose', curClose, 'isPriceDec', isPriceDec,secsFilledArr[secsFilledArr.length-1])
-          // console.log(isPriceDec,secsFilledArr[secsFilledArr.length-1])
+          // console.log('curClose', curClose, 'isPriceDec', isPriceDec,secsFilledArr[secsFilledArr.length-1])
         }
       }
     }

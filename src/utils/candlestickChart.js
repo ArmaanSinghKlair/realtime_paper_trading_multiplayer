@@ -1,3 +1,164 @@
+export class UserInfoSecPos {
+	userId;
+	username;
+	firstName;
+	lastName;
+	constructor(userId, username, firstName, lastName){
+		if(!userId || !username || !firstName || !lastName){
+			alert('Invalid User details recieved');
+			throw new Error('Invalid User details recieved');
+		}
+		this.userId = userId;
+		this.username = username;
+		this.firstName = firstName;
+		this.lastName = lastName;
+	}
+
+	//Returns user's initials.
+	static getUserInitials(userInfoSecPos){
+		return userInfoSecPos.firstName.charAt(0).toUpperCase()+""+userInfoSecPos.lastName.charAt(0).toUpperCase();
+	}
+}
+
+export class UserSecurityPosition {
+	// Variables to track account and position state
+	ownedQuantity; // Quantity owned (negative for short positions)
+	avgBuyPrice; // Average price for long positions
+	avgSellPrice; // Average price for short positions
+	accountBalance; // Initial account balance
+	unrealizedPL; // Unrealized profit/loss
+	realizedPL; // Realized profit/loss
+	userInfo;	//{userId: 1, username: 'ArmaanKlair', firstName: 'Armaan', lastName: 'Klair', color: 'rgba(110,137,90,1)'}	- all fields are guarenteed values.
+	
+	static INITIAL_ACCT_BALANCE = 10000;	//$10,000
+
+	// candlestickChart;
+	constructor(userInfo){		
+		this.userInfo = userInfo;
+		//link this user position with the chart
+		// this.candlestickChart = candlestickChart;
+		// this.candlestickChart.userSecPosMap.set(userInfo.userId, this);
+
+		this.ownedQuantity = 0; // Quantity owned (negative for short positions)
+		this.avgBuyPrice = null; // Average price for long positions
+		this.avgSellPrice = null; // Average price for short positions
+		this.accountBalance = UserSecurityPosition.INITIAL_ACCT_BALANCE; // Initial account balance
+		this.unrealizedPL = 0; // Unrealized profit/loss
+		this.realizedPL = 0;
+	}	
+}
+
+export class UserSecPosUtils {	
+	/**
+	 * Buy security. Updates input userPos object with correct values
+	 * @param {number} quantity - Quantity to buy
+	 * @param {number} price - Current market price
+	 */
+	static buySecurity(quantity, price, userSecPos) {
+		if(!userSecPos){
+			return;
+		}
+		const tradeValue = quantity * price;
+
+		// Validation: Check if enough funds are available
+		if (tradeValue > userSecPos.accountBalance) {
+		throw new Error("Insufficient funds to execute buy order.");
+		}
+
+		if (userSecPos.ownedQuantity < 0) {
+		// If currently short, close the short position first
+		const closingQuantity = Math.min(-userSecPos.ownedQuantity, quantity);
+		const remainingQuantity = quantity - closingQuantity;
+
+		// Realize profit/loss for the closing short position
+		userSecPos.realizedPL += (userSecPos.avgSellPrice - price) * closingQuantity;
+		userSecPos.ownedQuantity += closingQuantity;
+
+		if (remainingQuantity > 0) {
+			// Open a new long position with the remaining quantity
+			userSecPos.avgBuyPrice = price;
+			userSecPos.ownedQuantity += remainingQuantity;
+		}
+		} else {
+		// Update average buy price for long position
+		userSecPos.avgBuyPrice =
+			userSecPos.ownedQuantity > 0
+			? (userSecPos.avgBuyPrice * userSecPos.ownedQuantity + tradeValue) / (userSecPos.ownedQuantity + quantity)
+			: price;
+
+		// Update owned quantity
+		userSecPos.ownedQuantity += quantity;
+		}
+
+		// Deduct trade value from account balance
+		userSecPos.accountBalance -= tradeValue;
+
+		console.log(`Bought ${quantity} units at $${price}.`);
+		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
+	}
+
+	/**
+	 * Sell security (or short if selling more than owned)
+	 * @param {number} quantity - Quantity to sell
+	 * @param {number} price - Current market price
+	 */
+	static sellSecurity(quantity, price, userSecPos) {
+		if(!userSecPos){
+			return;
+		}
+		const tradeValue = quantity * price;
+
+		if (quantity <= userSecPos.ownedQuantity) {
+		// Closing part or all of the long position
+		const realizedProfit = (price - userSecPos.avgBuyPrice) * quantity;
+		userSecPos.realizedPL += realizedProfit;
+		userSecPos.ownedQuantity -= quantity;
+
+		// Reset this.avgBuyPrice if position is fully closed
+		if (userSecPos.ownedQuantity === 0) userSecPos.avgBuyPrice = null;
+		} else {
+		// Selling more than owned quantity -> Switch to short position
+		const closingQuantity = userSecPos.ownedQuantity; // Fully close the long position
+		const shortQuantity = quantity - closingQuantity;
+
+		// Realize P&L for the closing long position
+		userSecPos.realizedPL += (price - userSecPos.avgBuyPrice) * closingQuantity;
+
+		// Update short position
+		userSecPos.avgSellPrice =
+			userSecPos.ownedQuantity < 0
+			? (userSecPos.avgSellPrice * Math.abs(userSecPos.ownedQuantity) + shortQuantity * price) /
+				(Math.abs(userSecPos.ownedQuantity) + shortQuantity)
+			: price; // Set this.avgSellPrice if no short position yet
+
+		userSecPos.ownedQuantity = -shortQuantity; // Switch to short position
+		}
+
+		// Add trade value to account balance
+		userSecPos.accountBalance+= tradeValue;
+
+		console.log(`Sold ${quantity} units at $${price}.`);
+		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
+	}
+
+	/**
+	 * Update unrealized P&L based on the current market price
+	 * @param {number} latestClosePrice - Current market price
+	 */
+	static updateUnrealizedPL(latestClosePrice, userSecPos) {
+		if(!userSecPos){
+			return;
+		}
+		if (userSecPos.ownedQuantity > 0) {
+			userSecPos.unrealizedPL = (latestClosePrice - userSecPos.avgBuyPrice) * userSecPos.ownedQuantity;
+		} else if (userSecPos.ownedQuantity < 0) {
+			userSecPos.unrealizedPL = (userSecPos.avgSellPrice - latestClosePrice) * Math.abs(userSecPos.ownedQuantity);
+		} else {
+			userSecPos.unrealizedPL = 0; // No position
+		}
+	}
+}
+
 export class CandlestickChart{
 
 	ratio = window.devicePixelRatio || 1;
@@ -32,7 +193,7 @@ export class CandlestickChart{
 	CHART_PL_PADDING = 50;
 	INTER_PL_BOX_PADDING = 25;
 	CHART_PL_BOX_HEIGHT = this.defaultTextFontSize + 5;
-	
+
 	//Tells if user has dragged the chart at least once. If not the chart automatically moves to the right.
 	isDragStart;
 
@@ -90,7 +251,7 @@ export class CandlestickChart{
 		this.chartContainerId = chartContainerId;
 		this.chartContainerWidth = chartContainerWidth;
 		this.chartContainerHeight = chartContainerHeight;
-		this.userSecPosMap = new Map();
+		this.userSecPosInfo = new Map();
 		this.userPLInChartPosArr = [];
 		this.userPLOutChartPosArr = [];
 		this.isDragStart = false;
@@ -189,7 +350,12 @@ export class CandlestickChart{
 			event.preventDefault();	//prevent anything else than code above
 		});
 
-		
+		this.candlestickCanvas.addEventListener('mouseleave', (event) => {
+			this.mouseX = null;
+			this.mouseY = null;
+			event.preventDefault();	//prevent anything else than code above
+		});
+
 		this.candlestickCanvas.addEventListener('mousemove', (event) => {
 			//End dragging if user went off canvas
 			this.mouseX = event.offsetX;
@@ -303,12 +469,17 @@ export class CandlestickChart{
 			this.curOhlcDataArr.push(candleData);
 		}
 		
-		//Update ALL user positions
-		for(let [userId, userSecPos] of this.userSecPosMap){
-			userSecPos.updateUnrealizedPL(candleData.close);
-		}
-
 		//Finally reload chart
+		this.reloadCandlestickChart(this.curOhlcDataArr);
+	}
+
+	/**
+	 * Called to update user positions.
+	 * Reloads the chart as well.
+	 */
+	updateUserSecPos(userSecPosMap){
+		this.userSecPosInfo = userSecPosMap;
+		//Reload chart
 		this.reloadCandlestickChart(this.curOhlcDataArr);
 	}
 
@@ -318,6 +489,9 @@ export class CandlestickChart{
 	 */
 	reloadCandlestickChart(candlestickDataArr) {
 		this.curOhlcDataArr = candlestickDataArr;
+		if(!this.curOhlcDataArr){
+			return;
+		}
 		if(!this.isDragStart){
 			this.lastCandlestickIndex = this.curOhlcDataArr.length-1;
 			//padding on right of chart when user hasn't started dragging
@@ -471,7 +645,7 @@ export class CandlestickChart{
 		){
 			this.popoverDivEl.style.left = `${userPLInfo.startX }px`; // Offset to avoid overlap
 			this.popoverDivEl.style.top = `${userPLInfo.endY}px`;
-			this.popoverDivEl.innerHTML = this.userSecPosMap.get(userPLInfo.userId).getUserPositionSummaryHtml();
+			this.popoverDivEl.innerHTML = this.userSecPosInfo.get(userPLInfo.userId).getUserPositionSummaryHtml();
 			this.popoverDivEl.style.display = "block";
 			return true
 		}
@@ -496,7 +670,8 @@ export class CandlestickChart{
 		*/
 		this.userPLInChartPosArr = [];	// {startY, endY, startX, endX}
 		this.userPLOutChartPosArr = [];	// {startY, endY, startX, endX}
-		for(let [userId, userSecPos] of this.userSecPosMap){
+		for(const userId in this.userSecPosInfo){
+			let userSecPos = this.userSecPosInfo[userId];
 			if(userSecPos.ownedQuantity && userSecPos.ownedQuantity != 0){
 				let isUserPosWithinChart = userSecPos.avgBuyPrice >= this.curMinPrice && userSecPos.avgBuyPrice <= this.curMaxPrice;
 
@@ -570,7 +745,7 @@ export class CandlestickChart{
 				}
 				
 				//Draw user Initials ie AK
-				let userInitialsText = userSecPos.getUserInitials();
+				let userInitialsText = UserInfoSecPos.getUserInitials(userSecPos.userInfo);
 				let userInitialsTextWidth = this.defaultTextFontSize*userInitialsText.length;
 				this.candleCtx.fillStyle=userSecPos.userInfo.color;
 				this.candleCtx.strokeStyle=userSecPos.userInfo.color;

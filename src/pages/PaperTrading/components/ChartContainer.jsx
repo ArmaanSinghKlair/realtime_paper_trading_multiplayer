@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container, Stack } from 'react-bootstrap';
-import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
-import { ICON_SMALL_SIZE } from '../../../styles/constants';
-import { CandlestickChart, UserSecurityPriceData } from '../../../utils/candlestickChart';
-import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
 import { useSelector } from 'react-redux';
-import { fillMissingCandles, parseCsv } from '../../../utils/genericUtils';
+import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
+import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
+import { getUserSecurityPositions } from '../../../features/userSecurityPos/userSecurityPosSlice';
+import { ICON_SMALL_SIZE } from '../../../styles/constants';
+import { CandlestickChart } from '../../../utils/candlestickChart';
+import { fillMissingCandles, parseCsv } from '../../../utils/genericUtils';
 
 const PAPER_TRADING_STATES = {
   NOT_STARTED: 'NOT_STARTED',
@@ -18,6 +19,7 @@ const ChartContainer = () => {
   const curOhlcTradingDataRef = useRef(null);
 
   const currentTheme = useSelector(getCurrentTheme);
+  const userSecPosMap = useSelector(getUserSecurityPositions);
   const chartContainerRef = useRef(null);
   const chartObjectRef = useRef(null);
   const chartContainerId = "candlestickChartContainer";
@@ -67,6 +69,14 @@ const ChartContainer = () => {
     }
     chartObjectRef.current?.setCandlestickTheme(themeObj);
   },[currentTheme]);
+
+  //Initialize already stored users
+  useEffect(()=>{
+    // console.log(userSecPosMap);
+    if(userSecPosMap){
+      chartObjectRef.current.updateUserSecPos(userSecPosMap);
+    }
+  }, [userSecPosMap]);
 
   //Check and start trading simulation
   useEffect(()=>{
