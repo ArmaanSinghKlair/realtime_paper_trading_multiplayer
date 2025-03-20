@@ -2,9 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { UserInfoSecPos, UserSecPosUtils, UserSecurityPosition } from "../../utils/candlestickChart";
 
 /** Inital state && theme reducer */
-let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair'));
-let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana'));
-UserSecPosUtils.buySecurity(1, 4130, userArmaan);
+let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
+let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'gold'));
+UserSecPosUtils.buySecurity(1, 430, userArmaan);
 UserSecPosUtils.sellSecurity(0.5, 4150, userArmaan);
 UserSecPosUtils.buySecurity(1, 4110, userNaman);
 
@@ -34,9 +34,9 @@ const userSecurityPosSlice = createSlice({
         state[userId] = null;
       },
       updateChartLatestCandle(state, action){
-        const {latestClosePrice} = action.payload;
-        for(let [userId, userSecPos] of state){
-          UserSecPosUtils.updateUnrealizedPL(latestClosePrice, userSecPos);
+        const latestClosePrice = action.payload;
+        for(let userId in state){
+          UserSecPosUtils.updateUnrealizedPL(latestClosePrice, state[userId]);
         }
       }
     }
@@ -54,7 +54,7 @@ export const { buySecurity, sellSecurity, addUser, removeUser, updateChartLatest
  */
 export const buySecurityAsync = (chart, buySecDetailsObj) => (dispatch, getState) =>{
   dispatch(buySecurity(buySecDetailsObj));
-  chart.updateUserSecPos(getState()); //updated state here
+  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -66,7 +66,7 @@ export const buySecurityAsync = (chart, buySecDetailsObj) => (dispatch, getState
  */
 export const sellSecurityAsync = (chart, sellSecDetailsObj) => (dispatch, getState) =>{
   dispatch(sellSecurity(sellSecDetailsObj));
-  chart.updateUserSecPos(getState()); //updated state here
+  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -78,7 +78,7 @@ export const sellSecurityAsync = (chart, sellSecDetailsObj) => (dispatch, getSta
  */
 export const addUserAsync = (chart, userInfo) => (dispatch, getState) =>{
   dispatch(addUser(userInfo));
-  chart.updateUserSecPos(getState()); //updated state here
+  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -90,7 +90,7 @@ export const addUserAsync = (chart, userInfo) => (dispatch, getState) =>{
  */
 export const removeUserAsync = (chart, userInfo) => (dispatch, getState) =>{
   dispatch(removeUser(userInfo));
-  chart.updateUserSecPos(getState()); //updated state here
+  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -102,8 +102,8 @@ export const removeUserAsync = (chart, userInfo) => (dispatch, getState) =>{
  */
 export const updateChartLatestCandleAsync = (chart, candle) => (dispatch, getState) =>{
   dispatch(updateChartLatestCandle(candle.close));
-  chart.updateUserSecPos(getState()); //updated state here. Display not changed yet
-  chart.updateLatestCandle(candleData); //finally update candlestick chart display as well.
+  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here. Display not changed yet
+  chart.updateLatestCandle(candle); //finally update candlestick chart display as well.
 }
 
 

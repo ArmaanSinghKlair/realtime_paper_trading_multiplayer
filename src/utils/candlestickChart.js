@@ -3,8 +3,9 @@ export class UserInfoSecPos {
 	username;
 	firstName;
 	lastName;
-	constructor(userId, username, firstName, lastName){
-		if(!userId || !username || !firstName || !lastName){
+	color;
+	constructor(userId, username, firstName, lastName, color){
+		if(!userId || !username || !firstName || !lastName || !color){
 			alert('Invalid User details recieved');
 			throw new Error('Invalid User details recieved');
 		}
@@ -12,6 +13,7 @@ export class UserInfoSecPos {
 		this.username = username;
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.color = color;
 	}
 
 	//Returns user's initials.
@@ -93,8 +95,8 @@ export class UserSecPosUtils {
 		// Deduct trade value from account balance
 		userSecPos.accountBalance -= tradeValue;
 
-		console.log(`Bought ${quantity} units at $${price}.`);
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
+		console.log(`Bought ${quantity} units at $${price}. Unrealized PL is ${userSecPos.unrealizedPL}`);
 	}
 
 	/**
@@ -137,8 +139,8 @@ export class UserSecPosUtils {
 		// Add trade value to account balance
 		userSecPos.accountBalance+= tradeValue;
 
-		console.log(`Sold ${quantity} units at $${price}.`);
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
+		console.log(`Sold ${quantity} units at $${price}. Unrealized PL is ${userSecPos.unrealizedPL}`);
 	}
 
 	/**

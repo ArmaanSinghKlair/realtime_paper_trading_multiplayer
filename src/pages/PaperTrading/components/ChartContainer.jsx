@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Container, Stack } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
 import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
-import { getUserSecurityPositions } from '../../../features/userSecurityPos/userSecurityPosSlice';
+import { getUserSecurityPositions, updateChartLatestCandle, updateChartLatestCandleAsync } from '../../../features/userSecurityPos/userSecurityPosSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { CandlestickChart } from '../../../utils/candlestickChart';
 import { fillMissingCandles, parseCsv } from '../../../utils/genericUtils';
@@ -19,7 +19,8 @@ const ChartContainer = () => {
   const curOhlcTradingDataRef = useRef(null);
 
   const currentTheme = useSelector(getCurrentTheme);
-  const userSecPosMap = useSelector(getUserSecurityPositions);
+  const userSecPosObj = useSelector(getUserSecurityPositions);
+  const storeDispatch = useDispatch();
   const chartContainerRef = useRef(null);
   const chartObjectRef = useRef(null);
   const chartContainerId = "candlestickChartContainer";
@@ -73,10 +74,10 @@ const ChartContainer = () => {
   //Initialize already stored users
   useEffect(()=>{
     // console.log(userSecPosMap);
-    if(userSecPosMap){
-      chartObjectRef.current.updateUserSecPos(userSecPosMap);
+    if(userSecPosObj){
+      chartObjectRef.current.updateUserSecPos(userSecPosObj);
     }
-  }, [userSecPosMap]);
+  }, [userSecPosObj]);
 
   //Check and start trading simulation
   useEffect(()=>{
@@ -95,7 +96,7 @@ const ChartContainer = () => {
           }
            
           simulateFuncInterval = setInterval(()=>{
-            chartObjectRef.current.updateLatestCandle(curOhlcTradingDataRef.current[curCandleIndex]);
+            storeDispatch(updateChartLatestCandleAsync(chartObjectRef.current, curOhlcTradingDataRef.current[curCandleIndex]))
             curCandleIndex++;
           }, 1000); 
         }
