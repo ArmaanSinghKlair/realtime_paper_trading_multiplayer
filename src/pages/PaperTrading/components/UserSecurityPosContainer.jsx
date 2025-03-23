@@ -25,9 +25,9 @@ export const UserSecurityPosContainer = () => {
         </Stack>
 
         {/** User account summary */}
-        <Stack direction='horizontal' className='ms-auto' gap={3}>
+        <Stack direction='horizontal' className='ms-auto app-fs-sm' gap={3}>
             <Stack>
-                <span className='app-fs-sm fw-bold'>Account Balance</span>
+                <span className='fw-bold'>Account Balance</span>
                 <span>
                 {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
                 </span>
@@ -35,15 +35,15 @@ export const UserSecurityPosContainer = () => {
             <div className='vr'></div>
 
             <Stack>
-                <span className='app-fs-sm fw-bold'>Equity</span>
+                <span className='fw-bold'>Equity</span>
                 <span>
-                    {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.ownedQuantity}</PriceNumberFormatter> : '-'}
+                    {curSecurityDetails ? <PriceNumberFormatter>{UserSecPosUtils.getUserSecEquity(curSecurityDetails)}</PriceNumberFormatter> : '-'}
                 </span>
             </Stack>
             <div className='vr'></div>
 
             <Stack>
-                <span className='app-fs-sm fw-bold'>Realized P&L</span>
+                <span className='fw-bold'>Realized P&L</span>
                 <span>
                     {curSecurityDetails ? <RedGreenText valNum={curSecurityDetails.realizedPL}><PriceNumberFormatter>{curSecurityDetails.realizedPL}</PriceNumberFormatter></RedGreenText> : '-'}
                 </span>
@@ -51,7 +51,7 @@ export const UserSecurityPosContainer = () => {
             <div className='vr'></div>
 
             <Stack>
-                <span className='app-fs-sm fw-bold'>Unrealized P&L</span>
+                <span className='fw-bold'>Unrealized P&L</span>
                 <span>
                     {curSecurityDetails ? <RedGreenText valNum={curSecurityDetails.unrealizedPL}><PriceNumberFormatter>{curSecurityDetails.unrealizedPL}</PriceNumberFormatter></RedGreenText> : '-'}
                 </span>
@@ -59,7 +59,7 @@ export const UserSecurityPosContainer = () => {
             <div className='vr'></div>
 
             <Stack>
-                <span className='app-fs-sm fw-bold'>Available Funds <TooltipText title={'Funds you can trade with'}><InfoCircleFill /></TooltipText></span>
+                <span className='fw-bold'>Available Funds <TooltipText title={'Funds you can trade with'}><InfoCircleFill /></TooltipText></span>
                 <span>
                     {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
                 </span>

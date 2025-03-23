@@ -757,7 +757,7 @@ export class CandlestickChart{
 				let isUserPosWithinChart = avgFillPrice >= this.curMinPrice && avgFillPrice <= this.curMaxPrice;
 
 				//Unrealized PL $ dimenstions. Length of string + 1 extra char padding on left & right.
-				let unrealizedPLText = userSecPos.unrealizedPL.toFixed(2)+" USD";
+				let unrealizedPLText = (userSecPos.unrealizedPL > 0 && '+') + userSecPos.unrealizedPL.toFixed(2)+" USD";
 				let userPLWidth = this.defaultTextFontSize*unrealizedPLText.length;
 
 				//avg buy price position on the chart
