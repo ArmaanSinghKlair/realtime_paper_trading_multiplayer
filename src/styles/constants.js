@@ -1,3 +1,5 @@
+import { UserMarketOrder } from "../utils/candlestickChart";
+
 export const ICON_SMALL_SIZE = '1.5rem';
 export const ICON_MEDIUM_SIZE = '2.5rem';
 
@@ -11,27 +13,27 @@ export const SECURITY_SUMMARY_TAB_KEYS = {
 
 export const SECURITY_ORDER_TAB_KEY = {
     ALL: {
-        key: "ALL",
+        key: UserMarketOrder.ORDER_STATUS_TYPE.ALL,
         tabTitle: "All"
     },
-    WORKING: {
-        key: "WORKING",
-        tabTitle: "Working"
-    },
-    INACTIVE: {
-        key: "INACTIVE",
-        tabTitle: "Inactive"
-    },
+    // WORKING: {
+    //     key: UserMarketOrder.ORDER_STATUS_TYPE.WORKING,
+    //     tabTitle: "Working"
+    // },
+    // INACTIVE: {
+    //     key: UserMarketOrder.ORDER_STATUS_TYPE.INACTIVE,
+    //     tabTitle: "Inactive"
+    // },
     FILLED: {
-        key: "FILLED",
+        key: UserMarketOrder.ORDER_STATUS_TYPE.FILLED,
         tabTitle: "Filled"
     },
-    CANCELLED: {
-        key: "CANCELLED",
-        tabTitle: "Cancelled"
-    },
+    // CANCELLED: {
+    //     key: UserMarketOrder.ORDER_STATUS_TYPE.CANCELLED,
+    //     tabTitle: "Cancelled"
+    // },
     REJECTED: {
-        key: "REJECTED",
+        key: UserMarketOrder.ORDER_STATUS_TYPE.REJECTED,
         tabTitle: "Rejected"
     },
 }

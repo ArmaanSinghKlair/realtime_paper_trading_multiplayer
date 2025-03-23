@@ -1,3 +1,33 @@
+export class UserMarketOrder{
+	static ORDER_SIDE_TYPE = {
+		BUY: 0,
+		SELL: 1
+	}
+	static ORDER_STATUS_TYPE = {
+		ALL: "ALL",
+		// WORKING: "WORKING",
+		// INACTIVE: "INACTIVE",
+		FILLED: "FILLED",
+		// CANCELLED:"CANCELLED",
+		REJECTED:"REJECTED",
+	}
+
+	quantity;
+	price;
+	placeTime;
+	orderId;
+	status;
+	orderSide;
+
+	constructor(quantity, price, userId, orderSide){
+		this.quantity = quantity;
+		this.price = price;
+		this.userId = userId;
+		this.orderSide = orderSide;
+		this.placeTime = new Date();
+		this.orderId = this.placeTime.valueOf();
+	}
+}
 export class UserInfoSecPos {
 	userId;
 	username;
@@ -47,7 +77,7 @@ export class UserSecurityPosition {
 		this.accountBalance = UserSecurityPosition.INITIAL_ACCT_BALANCE; // Initial account balance
 		this.unrealizedPL = 0; // Unrealized profit/loss
 		this.realizedPL = 0;
-	}	
+	}
 }
 
 export class UserSecPosUtils {	
@@ -56,7 +86,8 @@ export class UserSecPosUtils {
 	 * @param {number} quantity - Quantity to buy
 	 * @param {number} price - Current market price
 	 */
-	static buySecurity(quantity, price, userSecPos) {
+	static buySecurity(marketOrder, userSecPos) {
+		const {quantity, price} = marketOrder;
 		if(!userSecPos){
 			return;
 		}
@@ -104,7 +135,8 @@ export class UserSecPosUtils {
 	 * @param {number} quantity - Quantity to sell
 	 * @param {number} price - Current market price
 	 */
-	static sellSecurity(quantity, price, userSecPos) {
+	static sellSecurity(marketOrder, userSecPos) {
+		const {quantity, price} = marketOrder;
 		if(!userSecPos){
 			return;
 		}
@@ -159,6 +191,49 @@ export class UserSecPosUtils {
 			userSecPos.unrealizedPL = 0; // No position
 		}
 	}
+
+	static getUserSecMarketValue(userSecPos, price){
+		return Math.abs(userSecPos.ownedQuantity) * price;
+	}
+
+	static getUserSecEquity(userSecPos) {
+		return userSecPos.accountBalance+ userSecPos.unrealizedPL;
+	}
+
+	static getAvgFillPrice(userSecPos) {
+		return userSecPos.ownedQuantity > 0 ? userSecPos.avgBuyPrice : userSecPos.avgSellPrice
+	}
+	/**
+	 * Display account and position details
+	 * @param {number} price - Current market price
+	 */
+	static getUserPositionSummaryHtml(userSecPos) {
+		// Calculate key metrics
+		// const marketValue = userSecPos.getMarketValue(price); // Value of current position
+		// const equity = userSecPos.getEquity(); // Total account value
+		// const availableFunds = userSecPos.accountBalance; // Simplified: No margin/leverage
+		// const avgFillPrice = userSecPos.getAvgFillPrice(); // Avg price based on position
+	
+		return `
+			<table>
+				<tr><td><b>Name</b><td> <td>${userSecPos.userInfo.firstName} ${userSecPos.userInfo.lastName} (${userSecPos.userInfo.username})</td></tr>
+				<tr><td><b>Account Balance</b><td> <td>${userSecPos.accountBalance.toFixed(2)} USD</td></tr>
+				<tr><td><b>Unrealized P&L</b><td> <td>${userSecPos.unrealizedPL.toFixed(2)} USD</td></tr>
+				<tr><td><b>Owned Quantity</b><td> <td>${userSecPos.ownedQuantity}</td></tr>
+			</table>
+		`;
+		// console.log("\n--- Account Details ---");
+		// console.log(`Current Market Price: $${price}`);
+		// console.log(`Owned Quantity: ${userSecPos.ownedQuantity}`);
+		// console.log(`Avg Fill Price: $${avgFillPrice || 0}`);
+		// console.log(`Market Value: $${marketValue.toFixed(2)}`);
+		// console.log(`Account Balance: $${userSecPos.accountBalance.toFixed(2)}`);
+		// console.log(`Unrealized P&L: $${userSecPos.unrealizedPL.toFixed(2)}`);
+		// console.log(`Realized P&L: $${userSecPos.realizedPL.toFixed(2)}`);
+		// console.log(`Equity: $${equity.toFixed(2)}`);
+		// console.log(`Available Funds: $${availableFunds.toFixed(2)}`);
+		// console.log("------------------------");
+	}
 }
 
 export class CandlestickChart{
@@ -172,7 +247,7 @@ export class CandlestickChart{
 	greenColor = 'green';	//var(--bs-succcess-rgb)
 	redColor = 'red';	//var(--bs-danger-rgb)
 	blueColor = 'blue'
-	userSecPopoverBgColor = "#sF2F2F3";	//var(--bs-popover-bg)
+	userSecPopoverBgColor = "#F2F2F3";	//var(--bs-popover-bg)
 	userSecPopoverBorderColor = "rgba(0, 0, 0, 0.175)";	//var(--bs-popover-border-color)
 	userSecPopoverBorderRadius = 16;	//var(--bs-border-radius-xl)
 	defaultTextFontSize = 14;	//14
@@ -318,7 +393,8 @@ export class CandlestickChart{
 				fontSize: this.defaultTextFontSize+"px",
 				pointerEvents: 'none',
 				fontFamily: this.chartFontFamily,
-				borderRadius: this.userSecPopoverBorderRadius+"px"
+				borderRadius: this.userSecPopoverBorderRadius+"px",
+				color: this.textColor
 			})
 
 			//Add default text
@@ -355,6 +431,7 @@ export class CandlestickChart{
 		this.candlestickCanvas.addEventListener('mouseleave', (event) => {
 			this.mouseX = null;
 			this.mouseY = null;
+			this.popoverDivEl.style.display = "none";
 			event.preventDefault();	//prevent anything else than code above
 		});
 
@@ -647,7 +724,7 @@ export class CandlestickChart{
 		){
 			this.popoverDivEl.style.left = `${userPLInfo.startX }px`; // Offset to avoid overlap
 			this.popoverDivEl.style.top = `${userPLInfo.endY}px`;
-			this.popoverDivEl.innerHTML = this.userSecPosInfo.get(userPLInfo.userId).getUserPositionSummaryHtml();
+			this.popoverDivEl.innerHTML = UserSecPosUtils.getUserPositionSummaryHtml(this.userSecPosInfo[userPLInfo.userId]);
 			this.popoverDivEl.style.display = "block";
 			return true
 		}
@@ -675,7 +752,9 @@ export class CandlestickChart{
 		for(const userId in this.userSecPosInfo){
 			let userSecPos = this.userSecPosInfo[userId];
 			if(userSecPos.ownedQuantity && userSecPos.ownedQuantity != 0){
-				let isUserPosWithinChart = userSecPos.avgBuyPrice >= this.curMinPrice && userSecPos.avgBuyPrice <= this.curMaxPrice;
+				let avgFillPrice = userSecPos.ownedQuantity < 0 ? userSecPos.avgSellPrice : userSecPos.avgBuyPrice;
+
+				let isUserPosWithinChart = avgFillPrice >= this.curMinPrice && avgFillPrice <= this.curMaxPrice;
 
 				//Unrealized PL $ dimenstions. Length of string + 1 extra char padding on left & right.
 				let unrealizedPLText = userSecPos.unrealizedPL.toFixed(2)+" USD";
@@ -686,7 +765,7 @@ export class CandlestickChart{
 				
 
 				if(isUserPosWithinChart){
-					avgBuyPriceYPos = Math.floor(this.candlestickHeight - (((userSecPos.avgBuyPrice-this.curMinPrice)/priceRange) * this.candlestickHeight))+0.5;
+					avgBuyPriceYPos = Math.floor(this.candlestickHeight - (((avgFillPrice-this.curMinPrice)/priceRange) * this.candlestickHeight))+0.5;
 				} else{
 					//put everything right at bottom
 					avgBuyPriceYPos = Math.floor(this.candlestickHeight - this.CHART_PL_BOX_HEIGHT/2)-5;
@@ -728,7 +807,7 @@ export class CandlestickChart{
 				this.yAxisCtx.textBaseline = "middle";
 				this.yAxisCtx.fillStyle = "white";
 				this.yAxisCtx.font = "400 "+this.defaultTextFontSize+"px "+this.chartFontFamily;
-				this.yAxisCtx.fillText(userSecPos.avgBuyPrice.toFixed(2), this.Y_AXIS_WIDTH/2, avgBuyPriceYPos);
+				this.yAxisCtx.fillText(avgFillPrice.toFixed(2), this.Y_AXIS_WIDTH/2, avgBuyPriceYPos);
 				
 				//Figure out starting X positions
 				let userInitialStartXPos;
@@ -1008,39 +1087,33 @@ export class CandlestickChart{
  * The security info should be stoed in redux anyway
  */
 export class UserSecurityPriceData {
-	ohlcCandleDataArr;
 	symbol;
 	symbolFullName;
-	candlestickChart;
+	minTradeableValue;
 
-	constructor({symbol, symbolFullName, candlestickChart}){
+	constructor(symbol, symbolFullName, minTradeableValue){
 		this.symbol = symbol;
 		this.symbolFullName = symbolFullName;
-		this.candlestickChart = candlestickChart;
-		this.ohlcCandleDataArr = [];
-
-		//Generate some fake data....REMOVE LATER
-		this.generateRandomData();
-		this.candlestickChart.reloadCandlestickChart(this.ohlcCandleDataArr);
+		this.minTradeableValue = minTradeableValue;
 	}
 
 	// Placeholder for initializing chart data
-	generateRandomData() {
-		let min = 100;
-		let maxPosDeviation = 100;
-		let curDate = new Date();
-		curDate.setUTCSeconds(0, 0);
-		let curTimestamp = curDate.valueOf();
-		for (let i = 0; i < 50; i++) {
-			let openVal = min+Math.random() * maxPosDeviation + i;
-			let closeVal = min+Math.random() * maxPosDeviation + i;
-			this.ohlcCandleDataArr.unshift({
-				open: openVal,
-				high: (Math.random() * 10) + Math.max(openVal, closeVal),
-				low: Math.max(0,Math.min(openVal, closeVal) - (Math.random() * 30)),
-				close: closeVal,
-				timestamp: curTimestamp - (i*60*1000)
-			});
-		}
-	}
+	// generateRandomData() {
+	// 	let min = 100;
+	// 	let maxPosDeviation = 100;
+	// 	let curDate = new Date();
+	// 	curDate.setUTCSeconds(0, 0);
+	// 	let curTimestamp = curDate.valueOf();
+	// 	for (let i = 0; i < 50; i++) {
+	// 		let openVal = min+Math.random() * maxPosDeviation + i;
+	// 		let closeVal = min+Math.random() * maxPosDeviation + i;
+	// 		this.ohlcCandleDataArr.unshift({
+	// 			open: openVal,
+	// 			high: (Math.random() * 10) + Math.max(openVal, closeVal),
+	// 			low: Math.max(0,Math.min(openVal, closeVal) - (Math.random() * 30)),
+	// 			close: closeVal,
+	// 			timestamp: curTimestamp - (i*60*1000)
+	// 		});
+	// 	}
+	// }
 }

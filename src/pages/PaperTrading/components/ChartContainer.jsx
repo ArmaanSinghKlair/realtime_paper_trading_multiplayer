@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
 import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
-import { getUserSecurityPositions, updateChartLatestCandle, updateChartLatestCandleAsync } from '../../../features/userSecurityPos/userSecurityPosSlice';
+import { getUserSecurityPositions, updateChartLatestCandleAsync } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { CandlestickChart } from '../../../utils/candlestickChart';
 import { fillMissingCandles, parseCsv } from '../../../utils/genericUtils';
@@ -50,9 +50,8 @@ const ChartContainer = () => {
       greenColor: `rgb(${bodyComputedStyled.getPropertyValue('--bs-success-rgb')})`,
       redColor: `rgb(${bodyComputedStyled.getPropertyValue('--bs-danger-rgb')})`,
       blueColor: `rgb(${bodyComputedStyled.getPropertyValue('--bs-primary-rgb')})`,
-      userSecPopoverBgColor: bodyComputedStyled.getPropertyValue('--bs-popover-bg'),
       userSecPopoverBorderColor: 'rgba(0, 0, 0, 0.176)',
-      userSecPopoverBorderRadius: bodyComputedStyled.getPropertyValue('--bs-border-radius-xl'),
+      userSecPopoverBorderRadius: bodyComputedStyled.getPropertyValue('--bs-border-radius-lg'),
     }
 
     if(currentTheme == THEME_SLICE_VALUES.DARK){
@@ -65,7 +64,7 @@ const ChartContainer = () => {
       themeObj = {
         ...themeObj,  
         gridLinesColor: '#F3F3F3',
-        userSecPopoverBgColor: '#ff',
+        userSecPopoverBgColor: '#fff',
       };
     }
     chartObjectRef.current?.setCandlestickTheme(themeObj);

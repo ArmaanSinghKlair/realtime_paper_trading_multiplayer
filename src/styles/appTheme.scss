@@ -89,7 +89,7 @@ body{
   
 }
 
-.app-table td:not([class^="text-"]), .app-table th:not([class^="text-"]){
+ .app-table th:not([class^="text-"]){
   color: var(--bs-body-color) !important;
 }
 

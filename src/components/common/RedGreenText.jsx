@@ -6,15 +6,20 @@ import React from 'react';
  * @returns 
  */
 export const RedGreenText = ({valNum, children}) => {
+    let numericalVal = valNum;
+    if(!numericalVal){
+      //assume children is number itself
+      numericalVal = children;
+    }
     let itemValueClass = '';
-    if(valNum != 0){
-        if(valNum < 0){
+    if(numericalVal != 0){
+        if(numericalVal < 0){
             itemValueClass = 'text-danger';
         } else{
             itemValueClass = 'text-success';
         }
     }
   return (
-    <span className={itemValueClass}>{children}</span>
+    <span className={itemValueClass}>{numericalVal > 0 && '+'}{children}</span>
   )
 }

@@ -1,14 +1,29 @@
 import React, { useState } from "react";
-import { Button, Col, Container, FloatingLabel, Form, InputGroup, Row, Stack, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import { Calculator, CalculatorFill } from "react-bootstrap-icons";
+import { Button, Col, Container, Form, InputGroup, Row, Stack } from "react-bootstrap";
+import { CalculatorFill } from "react-bootstrap-icons";
+import { useSelector } from "react-redux";
+import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
+import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 
 const BUY_SELL_TAB_STATE = {
   BUY: "BUY",
   SELL: "SELL"
 }
 const SecurityBuySellContainer = () => {
+  const userSecPosObj = useSelector(getUserSecurityInfo);
+  const [units, setUnits] = useState(0);
+  const [unitError, setUnitError] = useState(null);
   const [buySellTabState, setBuySellTabState] = useState(BUY_SELL_TAB_STATE.BUY);
+
+  const handleUnitChange = (val) =>{
+    if(val < userSecPosObj.curSecurityDetails.minTradeableValue){
+      setUnitError(`Specified value is less than the instrument minimum of ${userSecPosObj.curSecurityDetails.minTradeableValue}`)
+    } else{
+      setUnitError(null);
+    }
+    setUnits(val);
+  }
   // const [uni]
   return <>
           <Stack direction='horizontal' className="mb-3" gap={3}>
@@ -22,14 +37,14 @@ const SecurityBuySellContainer = () => {
                 onClick={()=>setBuySellTabState(BUY_SELL_TAB_STATE.BUY)}>
 
                 <span className="fw-bold">Buy</span>
-                <span>2,468.11</span>
+                <PriceNumberFormatter>{userSecPosObj.latestSecurityPrice}</PriceNumberFormatter>
 
               </Stack>
               <Stack 
                 className={`align-items-end py-2 px-3 rounded-end-4 ${buySellTabState==BUY_SELL_TAB_STATE.SELL ? 'text-danger bg-danger bg-opacity-25' : 'bg-body-secondary'}`} 
                 onClick={()=>setBuySellTabState(BUY_SELL_TAB_STATE.SELL)}>
                 <span className="fw-bold">Sell</span>
-                <span>2,510.43</span>
+                <PriceNumberFormatter>{userSecPosObj.latestSecurityPrice}</PriceNumberFormatter>
               </Stack>
             </Stack>
 
@@ -41,7 +56,13 @@ const SecurityBuySellContainer = () => {
             <Form.Control
               aria-label="Units"
               id="securityUnits"
+              value={units}
+              onChange={(el)=>{handleUnitChange(el.value)}}
+              type='number'
             />
+            <Form.Control.Feedback type="invalid">
+              {unitError}
+            </Form.Control.Feedback>
             <Form.Control
               aria-label="USD"
               id="securityUsd"

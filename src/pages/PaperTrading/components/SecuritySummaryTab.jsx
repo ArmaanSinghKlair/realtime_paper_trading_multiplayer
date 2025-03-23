@@ -2,6 +2,7 @@ import React from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
 import { SECURITY_SUMMARY_TAB_KEYS } from "../../../styles/constants";
 import SecuritySummaryOrderTab from "./SecuritySummaryOrderTab";
+import UserSecPosTable from "./UserSecPosTable";
 
 const SecuritySummaryTab = () => {
   return <Tab.Container defaultActiveKey={SECURITY_SUMMARY_TAB_KEYS.POSITION} >
@@ -21,7 +22,9 @@ const SecuritySummaryTab = () => {
   <Row>
       <Col>
           <Tab.Content>
-              <Tab.Pane eventKey={SECURITY_SUMMARY_TAB_KEYS.POSITION}>First tab content</Tab.Pane>
+              <Tab.Pane eventKey={SECURITY_SUMMARY_TAB_KEYS.POSITION}>
+                <UserSecPosTable />
+              </Tab.Pane>
               <Tab.Pane eventKey={SECURITY_SUMMARY_TAB_KEYS.ORDERS} className='py-2'>
                   <SecuritySummaryOrderTab />
               </Tab.Pane>

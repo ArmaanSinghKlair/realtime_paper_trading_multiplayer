@@ -7,36 +7,16 @@ import TooltipText from '../../../components/common/TooltipText';
 import { getCurrentTheme } from '../../../features/theme/themeSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import SecuritySummaryTab from './SecuritySummaryTab';
+import PriceNumberFormatter from '../../../components/common/PriceNumberFormattter';
+import { getUserSecurityInfo } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
+import { UserSecPosUtils, UserSecurityPosition } from '../../../utils/candlestickChart';
 
 export const UserSecurityPosContainer = () => {
     const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
     const currentTheme = useSelector(getCurrentTheme);
+    const userSecPosObj = useSelector(getUserSecurityInfo);
+    const curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
 
-    const accountSummaryContentItems = [
-        {
-            itemTitle: 'Account Balance',
-            itemValue: 94178.39,
-        },
-        {
-            itemTitle: 'Equity',
-            itemValue: 94179.67
-        },
-        {
-            itemTitle: 'Realized P&L',
-            itemValue: -5821.61,
-            requireColor: true
-        },
-        {
-            itemTitle: 'Unrealized P&L',
-            itemValue: 0.18,
-            requireColor: true
-        },
-        {
-            itemTitle: 'Available funds',
-            itemValue: 94179.67,
-            itemHelp: 'Funds you can trade with'
-        }
-    ];
     return <>
     <Stack direction='horizontal' >
         <Stack direction='horizontal' className='align-self-start app-card-title' gap={2}>
@@ -46,23 +26,44 @@ export const UserSecurityPosContainer = () => {
 
         {/** User account summary */}
         <Stack direction='horizontal' className='ms-auto' gap={3}>
-            {
-                accountSummaryContentItems.map((item, index)=> {
-                    return <Fragment key={index}>
-                        <Stack>
-                            <span className='app-fs-sm fw-bold'>{item.itemTitle} {item.itemHelp && <TooltipText title={item.itemHelp}><InfoCircleFill /></TooltipText>}</span>
-                            <span>
-                                {
-                                item.requireColor 
-                                ? <RedGreenText valNum={item.itemValue}>{item.itemValue}</RedGreenText>
-                                : item.itemValue
-                                }
-                            </span>
-                        </Stack>
-                        {index < accountSummaryContentItems.length-1 && <div className='vr'></div>}
-                    </Fragment>
-                })
-            }            
+            <Stack>
+                <span className='app-fs-sm fw-bold'>Account Balance</span>
+                <span>
+                {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
+                </span>
+            </Stack>
+            <div className='vr'></div>
+
+            <Stack>
+                <span className='app-fs-sm fw-bold'>Equity</span>
+                <span>
+                    {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.ownedQuantity}</PriceNumberFormatter> : '-'}
+                </span>
+            </Stack>
+            <div className='vr'></div>
+
+            <Stack>
+                <span className='app-fs-sm fw-bold'>Realized P&L</span>
+                <span>
+                    {curSecurityDetails ? <RedGreenText valNum={curSecurityDetails.realizedPL}><PriceNumberFormatter>{curSecurityDetails.realizedPL}</PriceNumberFormatter></RedGreenText> : '-'}
+                </span>
+            </Stack>
+            <div className='vr'></div>
+
+            <Stack>
+                <span className='app-fs-sm fw-bold'>Unrealized P&L</span>
+                <span>
+                    {curSecurityDetails ? <RedGreenText valNum={curSecurityDetails.unrealizedPL}><PriceNumberFormatter>{curSecurityDetails.unrealizedPL}</PriceNumberFormatter></RedGreenText> : '-'}
+                </span>
+            </Stack>
+            <div className='vr'></div>
+
+            <Stack>
+                <span className='app-fs-sm fw-bold'>Available Funds <TooltipText title={'Funds you can trade with'}><InfoCircleFill /></TooltipText></span>
+                <span>
+                    {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
+                </span>
+            </Stack>           
         </Stack>
     </Stack>
 
