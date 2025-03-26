@@ -18,7 +18,7 @@ export const UserSecurityPosContainer = () => {
     const curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
 
     return <>
-    <Stack direction='horizontal' >
+    <Stack direction='horizontal' className='mb-2'>
         <Stack direction='horizontal' className='align-self-start app-card-title' gap={2}>
             <Activity style={{width: ICON_SMALL_SIZE, height: ICON_SMALL_SIZE}} />
             <span style={{color: userColor}} className='fw-medium'>{userFirstName} {userLastName}</span>

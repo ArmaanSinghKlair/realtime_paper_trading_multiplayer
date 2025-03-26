@@ -12,7 +12,7 @@ const SecuritySummaryOrderTab = () => {
                 Object.keys(SECURITY_ORDER_TAB_KEY).map((key, index)=>{
                     return (
                         <Nav.Item key={key}>
-                            <Nav.Link eventKey={SECURITY_ORDER_TAB_KEY[key].key}>{SECURITY_ORDER_TAB_KEY[key].tabTitle}</Nav.Link>
+                            <Nav.Link eventKey={SECURITY_ORDER_TAB_KEY[key].key}>{SECURITY_ORDER_TAB_KEY[key].title}</Nav.Link>
                         </Nav.Item>
                     )
                 })
@@ -28,7 +28,7 @@ const SecuritySummaryOrderTab = () => {
                 Object.keys(SECURITY_ORDER_TAB_KEY).map((key, index)=>{
                     return (
                         <Tab.Pane key={key} eventKey={SECURITY_ORDER_TAB_KEY[key].key} className="pt-2">
-                            <SecurityOrderTable />
+                            <SecurityOrderTable orderStatus={key} />
                         </Tab.Pane>
                     )
                 })

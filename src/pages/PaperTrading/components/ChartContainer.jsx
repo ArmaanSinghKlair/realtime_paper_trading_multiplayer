@@ -80,7 +80,7 @@ const ChartContainer = () => {
 
   //Check and start trading simulation
   useEffect(()=>{
-    const simulateFuncInterval = null;
+    let simulateFuncInterval = null;
 
     if(paperTradingState == PAPER_TRADING_STATES.STARTED){
         

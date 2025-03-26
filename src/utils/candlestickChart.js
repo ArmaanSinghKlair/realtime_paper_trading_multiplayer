@@ -18,6 +18,7 @@ export class UserMarketOrder{
 	orderId;
 	status;
 	orderSide;
+	rejectionReason = 'Not enough funds to complete the order';	//default
 
 	constructor(quantity, price, userId, orderSide){
 		this.quantity = quantity;
@@ -26,6 +27,7 @@ export class UserMarketOrder{
 		this.orderSide = orderSide;
 		this.placeTime = new Date();
 		this.orderId = this.placeTime.valueOf();
+		this.status = UserMarketOrder.ORDER_STATUS_TYPE.FILLED;
 	}
 }
 export class UserInfoSecPos {

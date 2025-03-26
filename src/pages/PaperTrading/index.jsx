@@ -6,6 +6,7 @@ import GroupChatContainer from "./components/GroupChatContainer";
 import Header from "./components/Header";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
+import OrderNotification from "./components/OrderNotification";
 
 const PaperTrading = () => {
   const currentTheme = useSelector(getCurrentTheme);
@@ -18,7 +19,7 @@ const PaperTrading = () => {
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
   return <>
     <Container fluid className={`app-${currentTheme}-bg-root`}>
-      <Container fluid className="w-75">
+      <Container fluid style={{width:'80%'}}>
         {/** Header (TOP) */}
         <Header headerHeight={headerHeight} />
 
@@ -67,6 +68,7 @@ const PaperTrading = () => {
         </Container>
       </Container>
     </Container>
+    <OrderNotification />
   </>;
 };
 

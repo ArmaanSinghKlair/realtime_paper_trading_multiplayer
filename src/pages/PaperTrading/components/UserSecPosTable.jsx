@@ -14,7 +14,7 @@ const UserSecPosTable = () => {
         let curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
         secPosTableContent =  (<tbody>
         <tr>
-            <td>COINBASE:ETHUSD</td>
+            <td>{userSecPosObj.curSecurityDetails.symbol}</td>
             <td className={curSecurityDetails.ownedQuantity < 0 ? 'text-danger': 'text-primary'}>{curSecurityDetails.ownedQuantity < 0 ? 'Short' : 'Long'}</td>
             <td><PriceNumberFormatter>{curSecurityDetails.ownedQuantity}</PriceNumberFormatter></td>
             <td><PriceNumberFormatter>{UserSecPosUtils.getAvgFillPrice(curSecurityDetails)}</PriceNumberFormatter></td>

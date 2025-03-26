@@ -14,26 +14,26 @@ export const SECURITY_SUMMARY_TAB_KEYS = {
 export const SECURITY_ORDER_TAB_KEY = {
     ALL: {
         key: UserMarketOrder.ORDER_STATUS_TYPE.ALL,
-        tabTitle: "All"
+        title: "All"
     },
     // WORKING: {
     //     key: UserMarketOrder.ORDER_STATUS_TYPE.WORKING,
-    //     tabTitle: "Working"
+    //     title: "Working"
     // },
     // INACTIVE: {
     //     key: UserMarketOrder.ORDER_STATUS_TYPE.INACTIVE,
-    //     tabTitle: "Inactive"
+    //     title: "Inactive"
     // },
     FILLED: {
         key: UserMarketOrder.ORDER_STATUS_TYPE.FILLED,
-        tabTitle: "Filled"
+        title: "Filled"
     },
     // CANCELLED: {
     //     key: UserMarketOrder.ORDER_STATUS_TYPE.CANCELLED,
-    //     tabTitle: "Cancelled"
+    //     title: "Cancelled"
     // },
     REJECTED: {
         key: UserMarketOrder.ORDER_STATUS_TYPE.REJECTED,
-        tabTitle: "Rejected"
+        title: "Rejected"
     },
 }

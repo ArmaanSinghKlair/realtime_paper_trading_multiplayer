@@ -4,7 +4,7 @@ import { UserInfoSecPos, UserMarketOrder, UserSecPosUtils, UserSecurityPosition,
 /** Inital state && theme reducer */
 let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
 let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'gold'));
-let ethSec = new UserSecurityPriceData('ETHUSD', 'Ethereum / U.S. Dollar', 0.0001);
+let ethSec = new UserSecurityPriceData('COINBASE:ETHUSD', 'Ethereum / U.S. Dollar', 0.0001);
 
 let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
 let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
