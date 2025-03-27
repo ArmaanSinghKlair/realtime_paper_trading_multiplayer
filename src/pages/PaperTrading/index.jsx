@@ -6,10 +6,13 @@ import GroupChatContainer from "./components/GroupChatContainer";
 import Header from "./components/Header";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import OrderNotification from "./components/OrderNotification";
+import OrderNotificationContainer from "./components/OrderNotification";
+import { useRef } from "react";
 
 const PaperTrading = () => {
   const currentTheme = useSelector(getCurrentTheme);
+  const candlestickChartRef = useRef(null);
+
   const headerHeight = 10;
   const bodyHeight = 100-headerHeight;
 
@@ -33,7 +36,7 @@ const PaperTrading = () => {
                 {/** Chart Container (LEFT TOP) */}
                 <Col xs={12} style={{height: chartContainerHeightPer+"%"}} className="py-2">
                   <Container fluid className={`h-100 app-card rounded-4`}>
-                    <ChartContainer />
+                    <ChartContainer candlestickChartRef={candlestickChartRef} />
                   </Container>
                 </Col>
 
@@ -52,7 +55,7 @@ const PaperTrading = () => {
                 {/** Buy Sell (LEFT TOP) */}
                 <Col xs={12} style={{height: buySellPanelHeightPer+"%"}} className="py-2">
                   <Container  fluid className={`h-100 bg-body-secondary bg-opacity-50 app-card rounded-4`}>
-                    <SecurityBuySellContainer />
+                    <SecurityBuySellContainer candlestickChartRef={candlestickChartRef} />
                   </Container>
                 </Col>
 
@@ -68,7 +71,7 @@ const PaperTrading = () => {
         </Container>
       </Container>
     </Container>
-    <OrderNotification />
+    <OrderNotificationContainer notificationTitle="Your market orders" />
   </>;
 };
 

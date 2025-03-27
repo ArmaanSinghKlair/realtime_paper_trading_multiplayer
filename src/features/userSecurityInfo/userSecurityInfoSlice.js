@@ -6,12 +6,12 @@ let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaa
 let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'gold'));
 let ethSec = new UserSecurityPriceData('COINBASE:ETHUSD', 'Ethereum / U.S. Dollar', 0.0001);
 
-let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
-let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
+// let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
+// let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
 let buyNaman1 = new UserMarketOrder(1, 4110, userNaman.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
 
-UserSecPosUtils.buySecurity(buyArmaan1, userArmaan);
-UserSecPosUtils.sellSecurity(sellArmaan2, userArmaan);
+// UserSecPosUtils.buySecurity(buyArmaan1, userArmaan);
+// UserSecPosUtils.sellSecurity(sellArmaan2, userArmaan);
 UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
 
 const initialState = {
@@ -28,7 +28,7 @@ const userSecurityInfoSlice = createSlice({
     name: 'userSecurityInfo',
     initialState,
     reducers: {
-      buySeurity(state, action){
+      buySecurity(state, action){
         //action.paylod = UserMarketOrder
         UserSecPosUtils.buySecurity(action.payload, state.userSecurityPos[action.payload.userId]);
       },
@@ -51,12 +51,18 @@ const userSecurityInfoSlice = createSlice({
         for(let userId in state.userSecurityPos){
           UserSecPosUtils.updateUnrealizedPL(latestClosePrice, state.userSecurityPos[userId]);
         }
+      },
+      setCurrentUserId(state, action){
+        state.curUserId = action.payload;
+      },
+      addCurUserMarketOrder(state, action){
+        state.curUserMarketOrders.push(action.payload);
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { buySecurity, sellSecurity, addUser, removeUser, updateChartLatestCandle } = userSecurityInfoSlice.actions;
+export const { buySecurity, sellSecurity, addUser, removeUser, updateChartLatestCandle, setCurrentUserId, addCurUserMarketOrder } = userSecurityInfoSlice.actions;
 
 /**
  * Redux async thunk for buying security.

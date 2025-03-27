@@ -1,66 +1,52 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Badge, Stack, Toast, ToastContainer } from "react-bootstrap";
-import { CheckCircleFill, ExclamationCircleFill } from "react-bootstrap-icons";
+import React, { Fragment, useEffect, useState } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useImmer } from "use-immer";
 import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
-import { ICON_SMALL_SIZE } from "../../../styles/constants";
-import { UserMarketOrder } from "../../../utils/candlestickChart";
-import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import OrderNotificationItem from "./OrderNotificationItem";
 
-const OrderNotification = () => {
-    let orders = new UserMarketOrder(1, 430, 1, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
-    orders.status = UserMarketOrder.ORDER_STATUS_TYPE.REJECTED;
-    let orders1 = new UserMarketOrder(1, 430, 1, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
-    const [pendingOrders, setPendingOrders] = useImmer([orders, orders1]);
-    const lastRemoveTimeRef = useRef(null);
+const OrderNotificationContainer = ({notificationTitle='Notifications'}) => {
+    const [pendingOrders, setPendingOrders] = useImmer([]);
+    const [showNotif, setShowNotif] = useState(true);
     const userSecPosObj = useSelector(getUserSecurityInfo);
-    const curTabMarketOrders = userSecPosObj.curUserMarketOrders;
+    let curTabMarketOrders = userSecPosObj.curUserMarketOrders;
     //Runs when market order added
     useEffect(()=>{
         if(!curTabMarketOrders || curTabMarketOrders.length==0){
             return;
         }
+        let newMarketOrder = curTabMarketOrders[curTabMarketOrders.length-1];
         setPendingOrders(draft=>{
-            draft.push(curTabMarketOrders[curTabMarketOrders.length-1]);
+            draft.push(newMarketOrder);
         });
+        setShowNotif(true);
 
-        //make sure we remove 2 seconds after the previous item is cleared
-        let curTime = new Date().valueOf();
-        let lastRemoveTime = lastRemoveTimeRef.current;
-        if(!lastRemoveTime){
-            lastRemoveTime = curTime;
-        }
-        let removeInterval = setTimeout(()=>{
+        //Clear this notification after sometime also
+        setTimeout(()=>{
             setPendingOrders(draft =>{
-                draft.splice(0,1);  //remove 1st element from array
+                let targetIndex = draft.findIndex(el=>el.orderId==newMarketOrder.orderId);
+                if(targetIndex != -1){
+                    draft.splice(targetIndex,1);  //remove 1st element from array
+                }
             });
-        }, lastRemoveTime-curTime+2000);
-        lastRemoveTimeRef.current = lastRemoveTime-curTime+2000;
-        return ()=>{
-            if(removeInterval){
-                clearTimeout(removeInterval);
-            }
-        }
+        }, 4000);
     }, [curTabMarketOrders]);
-    // let message = pendingNotifs.map((notif)=>{
 
-    //     return noti
-    // }).join(<br />);
     return <>
     {pendingOrders.length > 0 &&
     <ToastContainer position="bottom-start" className="w-75" style={{ padding: '1rem' }}>
-        <Toast delay={2000}>
+        <Toast show={showNotif} onClose={()=>setShowNotif(!showNotif)} delay={2000}>
             <Toast.Header>
-            <strong className="me-auto">Your market orders</strong>
+            <strong className="me-auto">{notificationTitle}</strong>
             </Toast.Header>
             <Toast.Body>
                 {pendingOrders.map((order, index)=>{
-                    return <>
-                        <OrderNotificationItem order={order} key={index}/>
+                    return (
+                    <Fragment key={order.orderId}>
+                        <OrderNotificationItem order={order} />
                         {index < pendingOrders.length-1 && <hr />}
-                    </>
+                    </Fragment>
+                    )
                 })}
             </Toast.Body>
         </Toast>
@@ -69,4 +55,4 @@ const OrderNotification = () => {
     </>;
 };
 
-export default OrderNotification;
+export default OrderNotificationContainer;

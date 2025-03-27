@@ -25,8 +25,8 @@ export class UserMarketOrder{
 		this.price = price;
 		this.userId = userId;
 		this.orderSide = orderSide;
-		this.placeTime = new Date();
-		this.orderId = this.placeTime.valueOf();
+		this.placeTime = new Date().valueOf();
+		this.orderId = this.placeTime;
 		this.status = UserMarketOrder.ORDER_STATUS_TYPE.FILLED;
 	}
 }
@@ -93,40 +93,41 @@ export class UserSecPosUtils {
 		if(!userSecPos){
 			return;
 		}
-		const tradeValue = quantity * price;
-
-		// Validation: Check if enough funds are available
-		if (tradeValue > userSecPos.accountBalance) {
-		throw new Error("Insufficient funds to execute buy order.");
-		}
 
 		if (userSecPos.ownedQuantity < 0) {
-		// If currently short, close the short position first
-		const closingQuantity = Math.min(-userSecPos.ownedQuantity, quantity);
-		const remainingQuantity = quantity - closingQuantity;
+			// If currently short, close the short position first
+			const shortCloseQuantity = Math.min(Math.abs(userSecPos.ownedQuantity), quantity);
 
-		// Realize profit/loss for the closing short position
-		userSecPos.realizedPL += (userSecPos.avgSellPrice - price) * closingQuantity;
-		userSecPos.ownedQuantity += closingQuantity;
-
-		if (remainingQuantity > 0) {
-			// Open a new long position with the remaining quantity
-			userSecPos.avgBuyPrice = price;
-			userSecPos.ownedQuantity += remainingQuantity;
-		}
+			// Realize profit/loss for the closing short position
+			let shortCloseProfit = (userSecPos.avgSellPrice - price) * shortCloseQuantity;
+			userSecPos.realizedPL += shortCloseProfit;
+			userSecPos.accountBalance += shortCloseQuantity * userSecPos.avgSellPrice + shortCloseProfit;
+			
+			const longQuantity = quantity + userSecPos.ownedQuantity;
+			if (longQuantity > 0) {
+				// Open a new long position with the remaining quantity
+				userSecPos.avgBuyPrice = price;
+				userSecPos.ownedQuantity += longQuantity;
+				userSecPos.accountBalance -= longQuantity * price;
+			}
+			userSecPos.ownedQuantity += shortCloseQuantity;
+			// Reset this.avgSellPrice if position is fully closed
+			if (userSecPos.ownedQuantity === 0) userSecPos.avgSellPrice = null;
 		} else {
-		// Update average buy price for long position
-		userSecPos.avgBuyPrice =
-			userSecPos.ownedQuantity > 0
-			? (userSecPos.avgBuyPrice * userSecPos.ownedQuantity + tradeValue) / (userSecPos.ownedQuantity + quantity)
-			: price;
+			const tradeValue = quantity * price;
 
-		// Update owned quantity
-		userSecPos.ownedQuantity += quantity;
+			// Update average buy price for long position
+			if(userSecPos.ownedQuantity == 0){
+				userSecPos.avgBuyPrice = price;
+			} else{
+				userSecPos.avgBuyPrice = (userSecPos.avgBuyPrice * userSecPos.ownedQuantity + tradeValue) / (userSecPos.ownedQuantity + quantity);
+			}
+
+			// Update owned quantity
+			userSecPos.ownedQuantity += quantity;
+			// Deduct trade value from account balance
+			userSecPos.accountBalance -= quantity * price;
 		}
-
-		// Deduct trade value from account balance
-		userSecPos.accountBalance -= tradeValue;
 
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
 		console.log(`Bought ${quantity} units at $${price}. Unrealized PL is ${userSecPos.unrealizedPL}`);
@@ -142,36 +143,34 @@ export class UserSecPosUtils {
 		if(!userSecPos){
 			return;
 		}
-		const tradeValue = quantity * price;
 
-		if (quantity <= userSecPos.ownedQuantity) {
-		// Closing part or all of the long position
-		const realizedProfit = (price - userSecPos.avgBuyPrice) * quantity;
-		userSecPos.realizedPL += realizedProfit;
-		userSecPos.ownedQuantity -= quantity;
-
-		// Reset this.avgBuyPrice if position is fully closed
-		if (userSecPos.ownedQuantity === 0) userSecPos.avgBuyPrice = null;
-		} else {
-		// Selling more than owned quantity -> Switch to short position
-		const closingQuantity = userSecPos.ownedQuantity; // Fully close the long position
-		const shortQuantity = quantity - closingQuantity;
-
-		// Realize P&L for the closing long position
-		userSecPos.realizedPL += (price - userSecPos.avgBuyPrice) * closingQuantity;
-
-		// Update short position
-		userSecPos.avgSellPrice =
-			userSecPos.ownedQuantity < 0
-			? (userSecPos.avgSellPrice * Math.abs(userSecPos.ownedQuantity) + shortQuantity * price) /
-				(Math.abs(userSecPos.ownedQuantity) + shortQuantity)
-			: price; // Set this.avgSellPrice if no short position yet
-
-		userSecPos.ownedQuantity = -shortQuantity; // Switch to short position
+		if(userSecPos.ownedQuantity > 0){
+			//SELL long position
+			let sellQuantity = Math.min(quantity, userSecPos.ownedQuantity);
+			const realizedProfit = (price - userSecPos.avgBuyPrice) * sellQuantity;	
+			userSecPos.realizedPL += realizedProfit;
+			userSecPos.accountBalance += sellQuantity * price;	//pocket money after selling exisiting shares
+			
+			if(quantity > userSecPos.ownedQuantity){
+				//SHORT remaining
+				const shortQuantity = quantity - userSecPos.ownedQuantity;
+				userSecPos.avgSellPrice = price;
+				userSecPos.ownedQuantity -= shortQuantity;	//remove SHORT quanity from current owned units
+				userSecPos.accountBalance -= shortQuantity * price;
+			}
+			userSecPos.ownedQuantity -= sellQuantity;	//remove SELL quanity from current owned units
+			// Reset this.avgBuyPrice if position is fully closed
+			if (userSecPos.ownedQuantity === 0) userSecPos.avgBuyPrice = null;
+		} else{
+			//SHORT ONLY
+			if(userSecPos.ownedQuantity === 0 ){
+				userSecPos.avgSellPrice = price;
+			} else{
+				userSecPos.avgSellPrice = (userSecPos.avgSellPrice * Math.abs(userSecPos.ownedQuantity) + quantity * price) / (Math.abs(userSecPos.ownedQuantity) + quantity);
+			}
+			userSecPos.ownedQuantity -= quantity;
+			userSecPos.accountBalance -= quantity * price;
 		}
-
-		// Add trade value to account balance
-		userSecPos.accountBalance+= tradeValue;
 
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
 		console.log(`Sold ${quantity} units at $${price}. Unrealized PL is ${userSecPos.unrealizedPL}`);
@@ -755,11 +754,13 @@ export class CandlestickChart{
 			let userSecPos = this.userSecPosInfo[userId];
 			if(userSecPos.ownedQuantity && userSecPos.ownedQuantity != 0){
 				let avgFillPrice = userSecPos.ownedQuantity < 0 ? userSecPos.avgSellPrice : userSecPos.avgBuyPrice;
-
+				if(!avgFillPrice){
+					avgFillPrice = 0;	//edge case silent handling
+				}
 				let isUserPosWithinChart = avgFillPrice >= this.curMinPrice && avgFillPrice <= this.curMaxPrice;
 
 				//Unrealized PL $ dimenstions. Length of string + 1 extra char padding on left & right.
-				let unrealizedPLText = (userSecPos.unrealizedPL > 0 && '+') + userSecPos.unrealizedPL.toFixed(2)+" USD";
+				let unrealizedPLText = (userSecPos.unrealizedPL > 0 ? '+' : '') + userSecPos.unrealizedPL.toFixed(2)+" USD";
 				let userPLWidth = this.defaultTextFontSize*unrealizedPLText.length;
 
 				//avg buy price position on the chart

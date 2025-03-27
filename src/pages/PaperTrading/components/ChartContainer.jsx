@@ -14,7 +14,7 @@ const PAPER_TRADING_STATES = {
   STARTED: 'STARTED',
   FINISHED: 'FINISHED'
 }
-const ChartContainer = () => {
+const ChartContainer = ({candlestickChartRef}) => {
   const [paperTradingState, setPaperTradingState] = useState(PAPER_TRADING_STATES.STARTED);
   const curOhlcTradingDataRef = useRef(null);
 
@@ -22,14 +22,13 @@ const ChartContainer = () => {
   const userSecPosObj = useSelector(getUserSecurityPositions);
   const storeDispatch = useDispatch();
   const chartContainerRef = useRef(null);
-  const chartObjectRef = useRef(null);
   const chartContainerId = "candlestickChartContainer";
 
   //Initialize candlestick chart
   useEffect(()=>{
     const chartRect = chartContainerRef.current.getBoundingClientRect();
     const chart = new CandlestickChart({chartContainerId: chartContainerId, chartContainerWidth: chartRect.width, chartContainerHeight: chartRect.height});
-    chartObjectRef.current = chart;
+    candlestickChartRef.current = chart;
     return ()=>{
       //safely remove chart an any event listeners on unmount
       chart.removeChart();
@@ -67,14 +66,14 @@ const ChartContainer = () => {
         userSecPopoverBgColor: '#fff',
       };
     }
-    chartObjectRef.current?.setCandlestickTheme(themeObj);
+    candlestickChartRef.current?.setCandlestickTheme(themeObj);
   },[currentTheme]);
 
   //Initialize already stored users
   useEffect(()=>{
     // console.log(userSecPosMap);
     if(userSecPosObj){
-      chartObjectRef.current.updateUserSecPos(userSecPosObj);
+      candlestickChartRef.current.updateUserSecPos(userSecPosObj);
     }
   }, [userSecPosObj]);
 
@@ -91,11 +90,11 @@ const ChartContainer = () => {
           //prefill 10 mins
           let curCandleIndex=0;
           for(let i=0;i<curCandleIndex;i++){
-            chartObjectRef.current.updateLatestCandle(curOhlcTradingDataRef.current[i]);
+            candlestickChartRef.current.updateLatestCandle(curOhlcTradingDataRef.current[i]);
           }
            
           simulateFuncInterval = setInterval(()=>{
-            storeDispatch(updateChartLatestCandleAsync(chartObjectRef.current, curOhlcTradingDataRef.current[curCandleIndex]))
+            storeDispatch(updateChartLatestCandleAsync(candlestickChartRef.current, curOhlcTradingDataRef.current[curCandleIndex]))
             curCandleIndex++;
           }, 1000); 
         }

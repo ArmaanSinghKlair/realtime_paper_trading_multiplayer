@@ -4,21 +4,23 @@ import { useSelector } from "react-redux";
 import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { SECURITY_ORDER_TAB_KEY } from "../../../styles/constants";
 import { UserMarketOrder } from "../../../utils/candlestickChart";
+import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 
-const SecurityOrderTable = (orderStatus) => {
+const SecurityOrderTable = ({orderStatus}) => {
   const userSecPosObj = useSelector(getUserSecurityInfo);
-  const curTabMarketOrders = userSecPosObj.curUserMarketOrders.filter((el)=>el.status===orderStatus);
+  let curTabMarketOrders = userSecPosObj.curUserMarketOrders.filter((el)=>el.status==orderStatus || orderStatus == UserMarketOrder.ORDER_STATUS_TYPE.ALL);
   
   let orderTableRows = null;
   if(curTabMarketOrders.length > 0){
     orderTableRows = curTabMarketOrders.map((order)=>{
+      let isBuyOrder = order.orderSide == UserMarketOrder.ORDER_SIDE_TYPE.BUY;
       return <tr>
               <td>{userSecPosObj.curSecurityDetails.symbol}</td>
-              <td className={order.quantity < 0 ? 'text-danger': 'text-primary'}>{order.orderSide}</td>
+              <td className={isBuyOrder ? 'text-primary': 'text-danger'}>{isBuyOrder ? 'Buy' : 'Sell'}</td>
               <td><PriceNumberFormatter>{order.quantity}</PriceNumberFormatter></td>
               <td><PriceNumberFormatter>{order.price}</PriceNumberFormatter></td>
-              <td className={orderStatus == UserMarketOrder.ORDER_STATUS_TYPE.REJECTED ? 'text-danger': 'text-success'}>{SECURITY_ORDER_TAB_KEY[orderStatus].title}</td>
-              <td>{order.placeTime.toISOString()}</td>
+              <td className={order.status == UserMarketOrder.ORDER_STATUS_TYPE.REJECTED ? 'text-danger': 'text-success'}>{SECURITY_ORDER_TAB_KEY[order.status].title}</td>
+              <td>{new Date(order.placeTime).toISOString()}</td>
               <td>{order.orderId}</td>
               </tr>;
     })

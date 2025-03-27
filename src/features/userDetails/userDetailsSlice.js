@@ -39,5 +39,8 @@ const userDetailsSlice = createSlice({
 /** Export all ACTION CREATORS */
 export const { setUserDetails } = userDetailsSlice.actions;
 
+//Selector
+export const getCurUserDetails = (state) => state.userDetails;
+
 // Export the generated reducer function
 export default userDetailsSlice.reducer;

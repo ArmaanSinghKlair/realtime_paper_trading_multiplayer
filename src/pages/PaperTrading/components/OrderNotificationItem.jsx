@@ -6,6 +6,7 @@ import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
+import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
 
 const OrderNotificationItem = ({order}) => {
     const userSecPosObj = useSelector(getUserSecurityInfo);
@@ -21,7 +22,7 @@ const OrderNotificationItem = ({order}) => {
                 <span className="app-fs-sm">{userSecPosObj.curSecurityDetails.symbol}</span>
                 <span>
                     <Badge bg={order.orderSide==UserMarketOrder.ORDER_SIDE_TYPE.BUY ? 'primary':'danger'} className={`fw-normal app-fs-sm bg-opacity-25 ${order.orderSide==UserMarketOrder.ORDER_SIDE_TYPE.BUY ? 'text-primary':'text-danger'}`}>
-                        {order.orderSide==UserMarketOrder.ORDER_SIDE_TYPE.BUY ? 'Buy':'Sell'} <PriceNumberFormatter>1900000</PriceNumberFormatter>
+                        {order.orderSide==UserMarketOrder.ORDER_SIDE_TYPE.BUY ? 'Buy':'Sell'} <QuantityNumberFormattter>{order.quantity}</QuantityNumberFormattter>
                     </Badge>
                     {order.status==UserMarketOrder.ORDER_STATUS_TYPE.FILLED && (<span> at <PriceNumberFormatter>{order.price}</PriceNumberFormatter></span>)}
                 </span>

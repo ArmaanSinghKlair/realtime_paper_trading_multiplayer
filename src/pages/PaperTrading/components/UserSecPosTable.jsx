@@ -4,6 +4,7 @@ import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecu
 import { RedGreenText } from "../../../components/common/RedGreenText";
 import { UserSecPosUtils } from "../../../utils/candlestickChart";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
+import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
 
 const UserSecPosTable = () => {
     const userSecPosObj = useSelector(getUserSecurityInfo);
@@ -12,18 +13,17 @@ const UserSecPosTable = () => {
     
     if(userSecPosObj?.curUserId && userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId] && userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId]?.ownedQuantity != 0){
         let curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
-        secPosTableContent =  (<tbody>
+        secPosTableContent =  (
         <tr>
             <td>{userSecPosObj.curSecurityDetails.symbol}</td>
             <td className={curSecurityDetails.ownedQuantity < 0 ? 'text-danger': 'text-primary'}>{curSecurityDetails.ownedQuantity < 0 ? 'Short' : 'Long'}</td>
-            <td><PriceNumberFormatter>{curSecurityDetails.ownedQuantity}</PriceNumberFormatter></td>
+            <td><QuantityNumberFormattter>{curSecurityDetails.ownedQuantity}</QuantityNumberFormattter></td>
             <td><PriceNumberFormatter>{UserSecPosUtils.getAvgFillPrice(curSecurityDetails)}</PriceNumberFormatter></td>
             <td><PriceNumberFormatter>{userSecPosObj.latestSecurityPrice}</PriceNumberFormatter></td>
             <td><RedGreenText valNum={curSecurityDetails.unrealizedPL}><PriceNumberFormatter>{curSecurityDetails.unrealizedPL}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></RedGreenText></td>
             <td><PriceNumberFormatter>{Math.abs(curSecurityDetails.ownedQuantity) * userSecPosObj.latestSecurityPrice}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></td>
             <td><PriceNumberFormatter>{UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice)}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></td>
-        </tr>
-        </tbody>);
+        </tr>);
     } else{
         secPosTableContent = <tr><td className="border-0 text-center" colSpan={100}>There are no open positions in your trading account yet.</td></tr>
     }
@@ -40,7 +40,9 @@ const UserSecPosTable = () => {
             <th>Market Value</th>
         </tr>
     </thead>
-    {secPosTableContent}
+    <tbody>
+        {secPosTableContent}
+    </tbody>
     </Table>;
 };
 
