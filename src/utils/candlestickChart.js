@@ -1030,7 +1030,9 @@ export class CandlestickChart{
 				<div>H <span style="color:${color}">${data.high.toFixed(5)}</span></div>
 				<div>L <span style="color:${color}">${data.low.toFixed(5)}</span></div>
 				<div>C <span style="color:${color}">${data.close.toFixed(5)}</span></div>
-				</div>`;
+				</div>
+				<div><i>Custom made chart using html canvas</i>😉</div>
+				`;
 		}
 	}
 
