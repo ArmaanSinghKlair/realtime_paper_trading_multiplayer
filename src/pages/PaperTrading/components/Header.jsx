@@ -5,10 +5,11 @@ import { useSelector } from "react-redux";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { getCurrentTheme } from "../../../features/theme/themeSlice";
 import ThemeToggle from './ThemeToggle';
+import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 
 const Header = ({headerHeight}) => {
     const currentTheme = useSelector(getCurrentTheme);
-    const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
+    const {userId, userFirstName, userLastName, userColor} = useSelector(getCurUserDetails);
 
     return <Stack direction="horizontal" className={`align-items-center`} gap={3} style={{height:headerHeight+"vh"}}>
             <LightningChargeFill size={ICON_SMALL_SIZE} className="text-warning" />
@@ -18,7 +19,7 @@ const Header = ({headerHeight}) => {
             </Stack>
 
             <ThemeToggle rootElClassName="ms-auto" />
-            <div className={`app-initials-profile-icon app-initials-profile-icon-lg`} style={{backgroundColor: userColor}}>{userFirstName.charAt(0)+""+userLastName.charAt(0)}</div>
+            {userId && <div className={`app-initials-profile-icon app-initials-profile-icon-lg`} style={{backgroundColor: userColor}}>{userFirstName.charAt(0)+""+userLastName.charAt(0)}</div>}
           </Stack>;
 };
 

@@ -1,31 +1,35 @@
+import { useEffect, useRef } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { useSelector } from "react-redux";
-import { getCurrentTheme } from "../../features/theme/themeSlice";
 import ChartContainer from "./components/ChartContainer";
 import GroupChatContainer from "./components/GroupChatContainer";
-import Header from "./components/Header";
+import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import OrderNotificationContainer from "./components/OrderNotification";
-import { useRef } from "react";
+import { getCurUserDetails } from "../../features/userDetails/userDetailsSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addUserAsync, removeUserAsync } from "../../features/userSecurityInfo/userSecurityInfoSlice";
 
-const PaperTrading = () => {
-  const currentTheme = useSelector(getCurrentTheme);
+const PaperTrading = ({headerHeight}) => {
   const candlestickChartRef = useRef(null);
+  const storeDispatch = useDispatch();
+  const curUserDetails = useSelector(getCurUserDetails);
 
-  const headerHeight = 10;
   const bodyHeight = 100-headerHeight;
 
   const chartContainerHeightPer = 60;
   const userSecurityPosContainerPer = 100-chartContainerHeightPer;
   const buySellPanelHeightPer = 40;
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
-  return <>
-    <Container fluid className={`app-${currentTheme}-bg-root`}>
-      <Container fluid style={{width:'80%'}}>
-        {/** Header (TOP) */}
-        <Header headerHeight={headerHeight} />
+  
+  useEffect(()=>{
+    console.log('useEffect of PaperTrading trying to se current user first!!1!', curUserDetails);
+    storeDispatch(addUserAsync(candlestickChartRef.current, curUserDetails));
 
+    return ()=>{
+      storeDispatch(removeUserAsync(candlestickChartRef.current, curUserDetails));
+    }
+  }, []);
+  return <>
         {/** Entire Body below header */}
         <Container fluid style={{height:bodyHeight+"vh"}} className="py-1">
           <Row className={"h-100"}>
@@ -69,9 +73,7 @@ const PaperTrading = () => {
             </Col>
           </Row>
         </Container>
-      </Container>
-    </Container>
-    <OrderNotificationContainer notificationTitle="Your market orders" />
+        <OrderNotificationContainer notificationTitle="Your market orders" />
   </>;
 };
 

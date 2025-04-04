@@ -1,21 +1,21 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Stack } from 'react-bootstrap';
 import { Activity, InfoCircleFill } from 'react-bootstrap-icons';
 import { useSelector } from 'react-redux';
+import PriceNumberFormatter from '../../../components/common/PriceNumberFormattter';
 import { RedGreenText } from '../../../components/common/RedGreenText';
 import TooltipText from '../../../components/common/TooltipText';
-import { getCurrentTheme } from '../../../features/theme/themeSlice';
-import { ICON_SMALL_SIZE } from '../../../styles/constants';
-import SecuritySummaryTab from './SecuritySummaryTab';
-import PriceNumberFormatter from '../../../components/common/PriceNumberFormattter';
+import { getCurUserDetails } from '../../../features/userDetails/userDetailsSlice';
 import { getUserSecurityInfo } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
-import { UserSecPosUtils, UserSecurityPosition } from '../../../utils/candlestickChart';
+import { ICON_SMALL_SIZE } from '../../../styles/constants';
+import { UserSecPosUtils } from '../../../utils/candlestickChart';
+import SecuritySummaryTab from './SecuritySummaryTab';
 
 export const UserSecurityPosContainer = () => {
     const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
-    const currentTheme = useSelector(getCurrentTheme);
     const userSecPosObj = useSelector(getUserSecurityInfo);
-    const curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
+    const curUserDetails = useSelector(getCurUserDetails);
+    const curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails?.userId];
 
     return <>
     <Stack direction='horizontal' className='mb-2'>

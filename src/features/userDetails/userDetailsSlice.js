@@ -4,31 +4,34 @@ import { generateMediumIntensityColor } from "../../utils/genericUtils";
 
 /** Inital state && theme reducer */
 const initialState = {
-    userId: 123,
-    userFirstName: 'Armaan',
-    userLastName: 'Klair',
-    username: 'Ak_47_',
-    userColor: generateMediumIntensityColor()
+    // userId: 1,
+    // userFirstName: 'Armaan',
+    // userLastName: 'Klair',
+    // username: 'Ak_47_',
+    // userColor: generateMediumIntensityColor()
 }
 const userDetailsSlice = createSlice({
     name: 'userDetails',
     initialState,
     reducers: {
       setUserDetails: {
-        reducer(state, action){
-          state = {
+        reducer: (state, action) => {
+          console.log('Got here as well AFTER prepare in REDUCER', action);
+          return {
             ...state,
             ...action.payload
           }
         },
         //Adds a unique ID to each user. 
-        prepare(firstName, lastName, username){
+        prepare: (firstName, lastName, username) => {
+          console.log('got here in prepare functions');
           return {
             payload: {
               userId: uuidv4(),
               userFirstName: firstName,
               userLastName: lastName,
-              username: username
+              username: username,
+              userColor: generateMediumIntensityColor()
             }
           }
         }

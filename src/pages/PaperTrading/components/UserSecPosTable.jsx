@@ -5,14 +5,15 @@ import { RedGreenText } from "../../../components/common/RedGreenText";
 import { UserSecPosUtils } from "../../../utils/candlestickChart";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
+import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 
 const UserSecPosTable = () => {
     const userSecPosObj = useSelector(getUserSecurityInfo);
-
+    const curUserDetails = useSelector(getCurUserDetails);
     let secPosTableContent = null;
     
-    if(userSecPosObj?.curUserId && userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId] && userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId]?.ownedQuantity != 0){
-        let curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
+    if(curUserDetails.userId && userSecPosObj?.userSecurityPos[curUserDetails.userId] && userSecPosObj?.userSecurityPos[curUserDetails.userId]?.ownedQuantity != 0){
+        let curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails.userId];
         secPosTableContent =  (
         <tr>
             <td>{userSecPosObj.curSecurityDetails.symbol}</td>

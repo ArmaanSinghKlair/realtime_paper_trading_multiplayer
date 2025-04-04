@@ -26,7 +26,6 @@ const SecuritySummaryOrderTab = () => {
           <Tab.Content>
           {
                 Object.keys(SECURITY_ORDER_TAB_KEY).map((key, index)=>{
-                    console.log(SECURITY_ORDER_TAB_KEY[key].key)
                     return (
                         <Tab.Pane key={key} eventKey={SECURITY_ORDER_TAB_KEY[key].key} className="pt-2">
                             <SecurityOrderTable orderStatus={SECURITY_ORDER_TAB_KEY[key].key} />

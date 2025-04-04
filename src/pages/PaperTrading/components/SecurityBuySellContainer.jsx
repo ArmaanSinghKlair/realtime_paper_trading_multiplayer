@@ -6,6 +6,7 @@ import PriceNumberFormatter from "../../../components/common/PriceNumberFormattt
 import { addCurUserMarketOrder, buySecurity, buySecurityAsync, getUserSecurityInfo, sellSecurityAsync } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { UserMarketOrder, UserSecPosUtils } from "../../../utils/candlestickChart";
+import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 
 const BUY_SELL_TAB_STATE = {
   BUY: "BUY",
@@ -13,7 +14,8 @@ const BUY_SELL_TAB_STATE = {
 }
 const SecurityBuySellContainer = ({candlestickChartRef}) => {
   const userSecPosObj = useSelector(getUserSecurityInfo);
-  const curSecurityDetails = userSecPosObj?.userSecurityPos[userSecPosObj?.curUserId];
+  const curUserDetails = useSelector(getCurUserDetails);
+  const curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails?.userId];
   const [errMsg, setErrMsg] = useState(null);
   const [units, setUnits] = useState(1);
   const [buySellTabState, setBuySellTabState] = useState(BUY_SELL_TAB_STATE.BUY);
@@ -36,7 +38,7 @@ const SecurityBuySellContainer = ({candlestickChartRef}) => {
    */
   const handleSecTrans = () =>{
     let isBuyOrder = buySellTabState == BUY_SELL_TAB_STATE.BUY ;
-    let marketOrder = new UserMarketOrder(units, userSecPosObj.latestSecurityPrice, userSecPosObj.curUserId, isBuyOrder ? UserMarketOrder.ORDER_SIDE_TYPE.BUY : UserMarketOrder.ORDER_SIDE_TYPE.SELL);
+    let marketOrder = new UserMarketOrder(units, userSecPosObj.latestSecurityPrice, curUserDetails.userId, isBuyOrder ? UserMarketOrder.ORDER_SIDE_TYPE.BUY : UserMarketOrder.ORDER_SIDE_TYPE.SELL);
     let tradeValue = units * userSecPosObj.latestSecurityPrice;
     if(tradeValue > (curSecurityDetails.accountBalance + UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice))){ //trade > available funds + active trade value
       marketOrder.status = UserMarketOrder.ORDER_STATUS_TYPE.REJECTED;
