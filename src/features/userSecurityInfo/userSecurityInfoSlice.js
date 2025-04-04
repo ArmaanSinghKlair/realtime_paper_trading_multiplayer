@@ -39,7 +39,7 @@ const userSecurityInfoSlice = createSlice({
       addUser(state, action){
         const {userId, username, userFirstName, userLastName} = action.payload;
         let userInfoObj = new UserInfoSecPos(userId, username, userFirstName, userLastName, generateMediumIntensityColor());
-        state.userSecurityPos[userId] = new UserSecurityPosition(userInfoObj);
+        state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfoObj)));
       },
       removeUser(state, action){
         const {userId} = action.payload;

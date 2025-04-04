@@ -22,7 +22,7 @@ const UserSecPosTable = () => {
             <td><PriceNumberFormatter>{UserSecPosUtils.getAvgFillPrice(curSecurityDetails)}</PriceNumberFormatter></td>
             <td><PriceNumberFormatter>{userSecPosObj.latestSecurityPrice}</PriceNumberFormatter></td>
             <td><RedGreenText valNum={curSecurityDetails.unrealizedPL}><PriceNumberFormatter>{curSecurityDetails.unrealizedPL}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></RedGreenText></td>
-            <td><PriceNumberFormatter>{Math.abs(curSecurityDetails.ownedQuantity) * userSecPosObj.latestSecurityPrice}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></td>
+            <td><PriceNumberFormatter>{UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice)}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></td>
             <td><PriceNumberFormatter>{UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice)}</PriceNumberFormatter> <span className='app-fs-sm'>USD</span></td>
         </tr>);
     } else{

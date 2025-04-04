@@ -22,7 +22,6 @@ const PaperTrading = ({headerHeight}) => {
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
   
   useEffect(()=>{
-    console.log('useEffect of PaperTrading trying to se current user first!!1!', curUserDetails);
     storeDispatch(addUserAsync(candlestickChartRef.current, curUserDetails));
 
     return ()=>{

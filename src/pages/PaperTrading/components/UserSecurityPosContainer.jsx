@@ -29,7 +29,7 @@ export const UserSecurityPosContainer = () => {
             <Stack>
                 <span className='fw-bold'>Account Balance</span>
                 <span>
-                {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
+                {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance}</PriceNumberFormatter> : '-'}
                 </span>
             </Stack>
             <div className='vr'></div>
@@ -61,7 +61,7 @@ export const UserSecurityPosContainer = () => {
             <Stack>
                 <span className='fw-bold'>Available Funds <TooltipText title={'Funds you can trade with'}><InfoCircleFill /></TooltipText></span>
                 <span>
-                    {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.accountBalance }</PriceNumberFormatter> : '-'}
+                    {curSecurityDetails ? <PriceNumberFormatter>{curSecurityDetails.availableFunds}</PriceNumberFormatter> : '-'}
                 </span>
             </Stack>           
         </Stack>

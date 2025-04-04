@@ -25,6 +25,7 @@ const SecurityBuySellContainer = ({candlestickChartRef}) => {
    * @param {*} val 
    */
   const handleUnitChange = (val) =>{
+    val = parseFloat(val);
     if(val && val < userSecPosObj.curSecurityDetails.minTradeableValue){
       setErrMsg(`Specified value is less than the instrument minimum of ${userSecPosObj.curSecurityDetails.minTradeableValue}`)
     } else{
@@ -40,16 +41,25 @@ const SecurityBuySellContainer = ({candlestickChartRef}) => {
     let isBuyOrder = buySellTabState == BUY_SELL_TAB_STATE.BUY ;
     let marketOrder = new UserMarketOrder(units, userSecPosObj.latestSecurityPrice, curUserDetails.userId, isBuyOrder ? UserMarketOrder.ORDER_SIDE_TYPE.BUY : UserMarketOrder.ORDER_SIDE_TYPE.SELL);
     let tradeValue = units * userSecPosObj.latestSecurityPrice;
-    if(tradeValue > (curSecurityDetails.accountBalance + UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice))){ //trade > available funds + active trade value
+    
+    let availableFundsForTrade = curSecurityDetails.availableFunds;
+    //if long position, we can still sell that position to makeup for funds
+    if((isBuyOrder && curSecurityDetails.ownedQuantity < 0)
+      || (!isBuyOrder && curSecurityDetails.ownedQuantity > 0)){
+      availableFundsForTrade += UserSecPosUtils.getUserSecMarketValue(curSecurityDetails, userSecPosObj.latestSecurityPrice);
+    }
+    
+    if(tradeValue > availableFundsForTrade){
       marketOrder.status = UserMarketOrder.ORDER_STATUS_TYPE.REJECTED;
-    } else{
+    } else {
       if(isBuyOrder){
         storeDispatch(buySecurityAsync(candlestickChartRef.current, JSON.parse(JSON.stringify(marketOrder))));
-      } else{
+      } else {
         storeDispatch(sellSecurityAsync(candlestickChartRef.current, JSON.parse(JSON.stringify(marketOrder))));
       }
     }
     storeDispatch(addCurUserMarketOrder(JSON.parse(JSON.stringify(marketOrder)))); 
+    //reset units text field to 1 units after saving
     handleUnitChange(1);
   }
 

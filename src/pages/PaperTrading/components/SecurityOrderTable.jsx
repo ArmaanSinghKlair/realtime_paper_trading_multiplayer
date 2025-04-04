@@ -14,7 +14,7 @@ const SecurityOrderTable = ({orderStatus}) => {
   if(curTabMarketOrders.length > 0){
     orderTableRows = curTabMarketOrders.map((order)=>{
       let isBuyOrder = order.orderSide == UserMarketOrder.ORDER_SIDE_TYPE.BUY;
-      return <tr>
+      return <tr key={order.orderId}>
               <td>{userSecPosObj.curSecurityDetails.symbol}</td>
               <td className={isBuyOrder ? 'text-primary': 'text-danger'}>{isBuyOrder ? 'Buy' : 'Sell'}</td>
               <td><PriceNumberFormatter>{order.quantity}</PriceNumberFormatter></td>

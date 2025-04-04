@@ -60,6 +60,7 @@ export class UserSecurityPosition {
 	avgBuyPrice; // Average price for long positions
 	avgSellPrice; // Average price for short positions
 	accountBalance; // Initial account balance
+	availableFunds;	// Currently available funds
 	unrealizedPL; // Unrealized profit/loss
 	realizedPL; // Realized profit/loss
 	userInfo;	//{userId: 1, username: 'ArmaanKlair', firstName: 'Armaan', lastName: 'Klair', color: 'rgba(110,137,90,1)'}	- all fields are guarenteed values.
@@ -76,6 +77,7 @@ export class UserSecurityPosition {
 		this.ownedQuantity = 0; // Quantity owned (negative for short positions)
 		this.avgBuyPrice = null; // Average price for long positions
 		this.avgSellPrice = null; // Average price for short positions
+		this.availableFunds = UserSecurityPosition.INITIAL_ACCT_BALANCE; // Initial account balance
 		this.accountBalance = UserSecurityPosition.INITIAL_ACCT_BALANCE; // Initial account balance
 		this.unrealizedPL = 0; // Unrealized profit/loss
 		this.realizedPL = 0;
@@ -101,16 +103,18 @@ export class UserSecPosUtils {
 			// Realize profit/loss for the closing short position
 			let shortCloseProfit = (userSecPos.avgSellPrice - price) * shortCloseQuantity;
 			userSecPos.realizedPL += shortCloseProfit;
-			userSecPos.accountBalance += shortCloseQuantity * userSecPos.avgSellPrice + shortCloseProfit;
+			userSecPos.accountBalance += shortCloseProfit;
+			userSecPos.availableFunds += shortCloseQuantity * userSecPos.avgSellPrice + shortCloseProfit;
 			
+
 			const longQuantity = quantity + userSecPos.ownedQuantity;
+			userSecPos.ownedQuantity += shortCloseQuantity;	//update with closed short position after longQuantity variable initialized
 			if (longQuantity > 0) {
 				// Open a new long position with the remaining quantity
 				userSecPos.avgBuyPrice = price;
 				userSecPos.ownedQuantity += longQuantity;
-				userSecPos.accountBalance -= longQuantity * price;
+				userSecPos.availableFunds -= longQuantity * price;
 			}
-			userSecPos.ownedQuantity += shortCloseQuantity;
 			// Reset this.avgSellPrice if position is fully closed
 			if (userSecPos.ownedQuantity === 0) userSecPos.avgSellPrice = null;
 		} else {
@@ -126,7 +130,7 @@ export class UserSecPosUtils {
 			// Update owned quantity
 			userSecPos.ownedQuantity += quantity;
 			// Deduct trade value from account balance
-			userSecPos.accountBalance -= quantity * price;
+			userSecPos.availableFunds -= quantity * price;
 		}
 
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
@@ -143,22 +147,24 @@ export class UserSecPosUtils {
 		if(!userSecPos){
 			return;
 		}
+		let initialOwnedQuantity = userSecPos.ownedQuantity;
 
 		if(userSecPos.ownedQuantity > 0){
 			//SELL long position
 			let sellQuantity = Math.min(quantity, userSecPos.ownedQuantity);
 			const realizedProfit = (price - userSecPos.avgBuyPrice) * sellQuantity;	
 			userSecPos.realizedPL += realizedProfit;
-			userSecPos.accountBalance += sellQuantity * price;	//pocket money after selling exisiting shares
+			userSecPos.accountBalance += realizedProfit;
+			userSecPos.availableFunds += sellQuantity * price;	//pocket money after selling exisiting shares
+			userSecPos.ownedQuantity -= sellQuantity;
 			
-			if(quantity > userSecPos.ownedQuantity){
+			if(quantity > initialOwnedQuantity){
 				//SHORT remaining
-				const shortQuantity = quantity - userSecPos.ownedQuantity;
+				const shortQuantity = quantity - initialOwnedQuantity;
 				userSecPos.avgSellPrice = price;
 				userSecPos.ownedQuantity -= shortQuantity;	//remove SHORT quanity from current owned units
-				userSecPos.accountBalance -= shortQuantity * price;
+				userSecPos.availableFunds -= shortQuantity * price;
 			}
-			userSecPos.ownedQuantity -= sellQuantity;	//remove SELL quanity from current owned units
 			// Reset this.avgBuyPrice if position is fully closed
 			if (userSecPos.ownedQuantity === 0) userSecPos.avgBuyPrice = null;
 		} else{
@@ -169,7 +175,7 @@ export class UserSecPosUtils {
 				userSecPos.avgSellPrice = (userSecPos.avgSellPrice * Math.abs(userSecPos.ownedQuantity) + quantity * price) / (Math.abs(userSecPos.ownedQuantity) + quantity);
 			}
 			userSecPos.ownedQuantity -= quantity;
-			userSecPos.accountBalance -= quantity * price;
+			userSecPos.availableFunds -= quantity * price;
 		}
 
 		UserSecPosUtils.updateUnrealizedPL(price, userSecPos);
@@ -198,7 +204,7 @@ export class UserSecPosUtils {
 	}
 
 	static getUserSecEquity(userSecPos) {
-		return userSecPos.accountBalance+ userSecPos.unrealizedPL;
+		return userSecPos.accountBalance + userSecPos.unrealizedPL;
 	}
 
 	static getAvgFillPrice(userSecPos) {
@@ -212,7 +218,7 @@ export class UserSecPosUtils {
 		// Calculate key metrics
 		// const marketValue = userSecPos.getMarketValue(price); // Value of current position
 		// const equity = userSecPos.getEquity(); // Total account value
-		// const availableFunds = userSecPos.accountBalance; // Simplified: No margin/leverage
+		// const availableFunds = userSecPos.availableFunds; // Simplified: No margin/leverage
 		// const avgFillPrice = userSecPos.getAvgFillPrice(); // Avg price based on position
 	
 		return `
