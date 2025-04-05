@@ -3,10 +3,11 @@ import { Button, Col, Container, Form, InputGroup, Row, Stack } from "react-boot
 import { CalculatorFill } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
-import { addCurUserMarketOrder, buySecurity, buySecurityAsync, getUserSecurityInfo, sellSecurityAsync } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { buySecurityAsync, getGroupUserInfo, sellSecurityAsync } from "../../../features/groupUserInfo/groupUserInfoSlice";
+import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
+import { addCurUserMarketOrder, getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { UserMarketOrder, UserSecPosUtils } from "../../../utils/candlestickChart";
-import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 
 const BUY_SELL_TAB_STATE = {
   BUY: "BUY",
@@ -14,8 +15,10 @@ const BUY_SELL_TAB_STATE = {
 }
 const SecurityBuySellContainer = ({candlestickChartRef}) => {
   const userSecPosObj = useSelector(getUserSecurityInfo);
+  const groupUsersInfo = useSelector(getGroupUserInfo);
+
   const curUserDetails = useSelector(getCurUserDetails);
-  const curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails?.userId];
+  const curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails?.userId];
   const [errMsg, setErrMsg] = useState(null);
   const [units, setUnits] = useState(1);
   const [buySellTabState, setBuySellTabState] = useState(BUY_SELL_TAB_STATE.BUY);

@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurUserDetails } from "../../features/userDetails/userDetailsSlice";
 import ChartContainer from "./components/ChartContainer";
 import GroupChatContainer from "./components/GroupChatContainer";
 import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import { getCurUserDetails } from "../../features/userDetails/userDetailsSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { addUserAsync, removeUserAsync } from "../../features/userSecurityInfo/userSecurityInfoSlice";
+import { addUserAsync, removeUserAsync } from "../../features/groupUserInfo/groupUserInfoSlice";
 
 const PaperTrading = ({headerHeight}) => {
   const candlestickChartRef = useRef(null);

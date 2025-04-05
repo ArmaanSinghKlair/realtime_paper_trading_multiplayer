@@ -5,17 +5,18 @@ import { useSelector } from 'react-redux';
 import PriceNumberFormatter from '../../../components/common/PriceNumberFormattter';
 import { RedGreenText } from '../../../components/common/RedGreenText';
 import TooltipText from '../../../components/common/TooltipText';
+import { getGroupUserInfo } from '../../../features/groupUserInfo/groupUserInfoSlice';
 import { getCurUserDetails } from '../../../features/userDetails/userDetailsSlice';
-import { getUserSecurityInfo } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { UserSecPosUtils } from '../../../utils/candlestickChart';
 import SecuritySummaryTab from './SecuritySummaryTab';
 
 export const UserSecurityPosContainer = () => {
     const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
-    const userSecPosObj = useSelector(getUserSecurityInfo);
     const curUserDetails = useSelector(getCurUserDetails);
-    const curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails?.userId];
+    const groupUsersInfo = useSelector(getGroupUserInfo);
+
+    const curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails?.userId];
 
     return <>
     <Stack direction='horizontal' className='mb-2'>

@@ -8,7 +8,8 @@ const initialState = {
     userFirstName: 'Armaan',
     userLastName: 'Klair',
     username: 'Ak_47_',
-    userColor: generateMediumIntensityColor()
+    userColor: generateMediumIntensityColor(),
+    curTradingRoomId: 1,
 }
 const userDetailsSlice = createSlice({
     name: 'userDetails',
@@ -35,12 +36,15 @@ const userDetailsSlice = createSlice({
             }
           }
         }
+      },
+      setTradingRoomId(state, action){
+        state.curTradingRoomId = action.payload;
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { setUserDetails } = userDetailsSlice.actions;
+export const { setUserDetails, setTradingRoomId } = userDetailsSlice.actions;
 
 //Selector
 export const getCurUserDetails = (state) => state.userDetails;

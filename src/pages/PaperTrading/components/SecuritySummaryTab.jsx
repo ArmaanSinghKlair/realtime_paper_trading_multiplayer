@@ -1,14 +1,12 @@
 import React from "react";
-import { Col, Nav, Row, Tab } from "react-bootstrap";
+import { Nav, Tab } from "react-bootstrap";
 import { SECURITY_SUMMARY_TAB_KEYS } from "../../../styles/constants";
 import SecuritySummaryOrderTab from "./SecuritySummaryOrderTab";
 import UserSecPosTable from "./UserSecPosTable";
 
 const SecuritySummaryTab = () => {
   return <Tab.Container defaultActiveKey={SECURITY_SUMMARY_TAB_KEYS.POSITION} >
-  <Row>
-      <Col>
-          <Nav variant='tabs'>
+          <Nav variant='pills' className="pb-2 border-bottom">
               <Nav.Item>
                   <Nav.Link className='app-text-theme' eventKey={SECURITY_SUMMARY_TAB_KEYS.POSITION}>Position</Nav.Link>
               </Nav.Item>
@@ -16,11 +14,6 @@ const SecuritySummaryTab = () => {
                   <Nav.Link className='app-text-theme' eventKey={SECURITY_SUMMARY_TAB_KEYS.ORDERS}>Orders</Nav.Link>
               </Nav.Item>
           </Nav>
-      </Col>
-      
-  </Row>
-  <Row>
-      <Col>
           <Tab.Content>
               <Tab.Pane eventKey={SECURITY_SUMMARY_TAB_KEYS.POSITION}>
                 <UserSecPosTable />
@@ -29,9 +22,7 @@ const SecuritySummaryTab = () => {
                   <SecuritySummaryOrderTab />
               </Tab.Pane>
           </Tab.Content>
-      </Col>
-  </Row>
-</Tab.Container>;
+        </Tab.Container>;
 };
 
 export default SecuritySummaryTab;

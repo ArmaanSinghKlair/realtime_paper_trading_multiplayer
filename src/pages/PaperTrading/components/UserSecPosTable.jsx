@@ -1,19 +1,21 @@
 import { Table } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
-import { RedGreenText } from "../../../components/common/RedGreenText";
-import { UserSecPosUtils } from "../../../utils/candlestickChart";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
+import { RedGreenText } from "../../../components/common/RedGreenText";
+import { getGroupUserInfo } from "../../../features/groupUserInfo/groupUserInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
+import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { UserSecPosUtils } from "../../../utils/candlestickChart";
 
 const UserSecPosTable = () => {
     const userSecPosObj = useSelector(getUserSecurityInfo);
+    const groupUsersInfo = useSelector(getGroupUserInfo);
     const curUserDetails = useSelector(getCurUserDetails);
     let secPosTableContent = null;
     
-    if(curUserDetails.userId && userSecPosObj?.userSecurityPos[curUserDetails.userId] && userSecPosObj?.userSecurityPos[curUserDetails.userId]?.ownedQuantity != 0){
-        let curSecurityDetails = userSecPosObj?.userSecurityPos[curUserDetails.userId];
+    if(curUserDetails.userId && groupUsersInfo?.userSecurityPos[curUserDetails.userId] && groupUsersInfo?.userSecurityPos[curUserDetails.userId]?.ownedQuantity != 0){
+        let curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails.userId];
         secPosTableContent =  (
         <tr>
             <td>{userSecPosObj.curSecurityDetails.symbol}</td>

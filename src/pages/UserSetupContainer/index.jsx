@@ -1,13 +1,9 @@
-import { Button, Container, Form, Stack } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { getCurrentTheme } from "../../features/theme/themeSlice";
-import { getCurUserDetails, setUserDetails } from "../../features/userDetails/userDetailsSlice";
 import { useState } from "react";
-import { addUserAsync } from "../../features/userSecurityInfo/userSecurityInfoSlice";
+import { Button, Container, Form, Stack } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { setUserDetails } from "../../features/userDetails/userDetailsSlice";
 
 function UserSetupContainer({headerHeight}) {
-  const curUserDetails = useSelector(getCurUserDetails);
-  const currentTheme = useSelector(getCurrentTheme);
   const storeDispatch = useDispatch();
 
   const [username, setUsername] = useState('');
@@ -33,11 +29,12 @@ function UserSetupContainer({headerHeight}) {
     <>
       <Container fluid style={{height:bodyHeight+"vh"}} className="py-1">
         <Stack className="justify-content-center h-100">
-          <Container  fluid className={`h-50 bg-body-secondary bg-opacity-50 app-card rounded-4`} style={{width: '30%'}}>
+          <Container  fluid className={`h-50 bg-body-secondary bg-opacity-50 app-card rounded-4`} style={{width: '35%'}}>
             <Stack className="justify-content-between h-100">
               <Stack className="mb-4">
                 <span className='fs-2'>Hey There!</span>
                 <span>Tell us a little about yourself</span>
+                <hr />
               </Stack>
               <Form onSubmit={handleFormSubmit}>
                 <Stack gap={3}>
@@ -79,7 +76,7 @@ function UserSetupContainer({headerHeight}) {
         </Stack>
       </Container>
     </>
-  )
+  );
 }
 
 export default UserSetupContainer;
