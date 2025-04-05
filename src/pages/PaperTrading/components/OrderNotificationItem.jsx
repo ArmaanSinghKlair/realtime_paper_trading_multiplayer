@@ -3,13 +3,13 @@ import { Badge, Stack } from "react-bootstrap";
 import { CheckCircleFill, ExclamationCircleFill } from "react-bootstrap-icons";
 import { UserMarketOrder } from "../../../utils/candlestickChart";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
-import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import { useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
 
 const OrderNotificationItem = ({order}) => {
-    const userSecPosObj = useSelector(getUserSecurityInfo);
+    const userSecPosObj = useSelector(getTradingSecurityInfo);
     return <Stack direction="horizontal" gap={3} className="mb-1">
             {order.status==UserMarketOrder.ORDER_STATUS_TYPE.FILLED ? 
             <CheckCircleFill className="text-success" style={{width: ICON_SMALL_SIZE, height: ICON_SMALL_SIZE}} />

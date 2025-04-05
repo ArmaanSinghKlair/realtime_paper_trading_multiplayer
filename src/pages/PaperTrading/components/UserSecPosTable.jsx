@@ -5,11 +5,11 @@ import QuantityNumberFormattter from "../../../components/common/QuantityNumberF
 import { RedGreenText } from "../../../components/common/RedGreenText";
 import { getTradingRoomInfo } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
-import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import { UserSecPosUtils } from "../../../utils/candlestickChart";
 
 const UserSecPosTable = () => {
-    const userSecPosObj = useSelector(getUserSecurityInfo);
+    const userSecPosObj = useSelector(getTradingSecurityInfo);
     const tradingRoomInfo = useSelector(getTradingRoomInfo);
     const curUserDetails = useSelector(getCurUserDetails);
     let secPosTableContent = null;

@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
 import tradingRoomInfoReducer, { addUserAsync, appendToTradingRoomGroupChat, removeUserAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
 import userDetailsReducer, { getCurUserDetails, setTradingRoomId } from '../features/userDetails/userDetailsSlice';
-import userSecurityInfoReducer from '../features/userSecurityInfo/userSecurityInfoSlice';
+import tradingSecurityInfoReducer from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
 
 /**
@@ -161,7 +161,7 @@ export const store = configureStore({
   reducer: {
     theme: themeReducer,
     userDetails: userDetailsReducer,
-    userSecurityInfo: userSecurityInfoReducer,
+    tradingSecurityInfo: tradingSecurityInfoReducer,
     tradingRoomInfo: tradingRoomInfoReducer
   },
   middleware: (getDefaultMiddleware)=>getDefaultMiddleware().concat(websocketMiddleware)

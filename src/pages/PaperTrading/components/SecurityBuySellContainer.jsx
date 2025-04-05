@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import { buySecurityAsync, getTradingRoomInfo, sellSecurityAsync } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
-import { addCurUserMarketOrder, getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { addCurUserMarketOrder, getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { UserMarketOrder, UserSecPosUtils } from "../../../utils/candlestickChart";
 
@@ -14,7 +14,7 @@ const BUY_SELL_TAB_STATE = {
   SELL: "SELL"
 }
 const SecurityBuySellContainer = () => {
-  const userSecPosObj = useSelector(getUserSecurityInfo);
+  const userSecPosObj = useSelector(getTradingSecurityInfo);
   const tradingRoomInfo = useSelector(getTradingRoomInfo);
 
   const curUserDetails = useSelector(getCurUserDetails);

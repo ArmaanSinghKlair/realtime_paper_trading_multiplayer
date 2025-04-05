@@ -5,7 +5,7 @@ import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
 import { getUserSecurityPositions } from '../../../features/tradingRoomInfo/tradingRoomInfoSlice';
 import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
-import { updateChartLatestCandleAsync } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
+import { updateChartLatestCandleAsync } from '../../../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { CandlestickChart } from '../../../utils/candlestickChart';
 import { fillMissingCandles, parseCsv } from '../../../utils/genericUtils';

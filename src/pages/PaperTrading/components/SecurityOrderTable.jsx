@@ -1,13 +1,13 @@
 import React from "react";
 import { Table } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import { SECURITY_ORDER_TAB_KEY } from "../../../styles/constants";
 import { UserMarketOrder } from "../../../utils/candlestickChart";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 
 const SecurityOrderTable = ({orderStatus}) => {
-  const userSecPosObj = useSelector(getUserSecurityInfo);
+  const userSecPosObj = useSelector(getTradingSecurityInfo);
   let curTabMarketOrders = userSecPosObj.curUserMarketOrders.filter((el)=>el.status==orderStatus || orderStatus == UserMarketOrder.ORDER_STATUS_TYPE.ALL);
   
   let orderTableRows = null;

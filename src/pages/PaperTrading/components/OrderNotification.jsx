@@ -2,13 +2,13 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Toast, ToastContainer } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useImmer } from "use-immer";
-import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
+import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import OrderNotificationItem from "./OrderNotificationItem";
 
 const OrderNotificationContainer = ({notificationTitle='Notifications'}) => {
     const [pendingOrders, setPendingOrders] = useImmer([]);
     const [showNotif, setShowNotif] = useState(true);
-    const userSecPosObj = useSelector(getUserSecurityInfo);
+    const userSecPosObj = useSelector(getTradingSecurityInfo);
     let curTabMarketOrders = userSecPosObj.curUserMarketOrders;
     //Runs when market order added
     useEffect(()=>{

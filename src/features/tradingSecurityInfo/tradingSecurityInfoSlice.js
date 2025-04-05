@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { UserSecPosUtils, UserSecurityPriceData } from "../../utils/candlestickChart";
+import { UserSecurityPriceData } from "../../utils/candlestickChart";
 import { getUserSecurityPositions, updateUnrealizedPL } from "../tradingRoomInfo/tradingRoomInfoSlice";
 
 /** Inital state && theme reducer */
@@ -10,8 +10,12 @@ const initialState = {
   latestSecurityPrice: null,
   curSecurityDetails: JSON.parse(JSON.stringify(ethSec)),
 }
-const userSecurityInfoSlice = createSlice({
-    name: 'userSecurityInfo',
+
+/**
+ * Represents the security that will be traded by users on this platform
+ */
+const tradingSecurityInfoSlice = createSlice({
+    name: 'tradingSecurityInfo',
     initialState,
     reducers: {
       updateChartLatestCandle(state, action){
@@ -25,7 +29,7 @@ const userSecurityInfoSlice = createSlice({
 });
 
 /** Export all ACTION CREATORS */
-export const { updateChartLatestCandle, addCurUserMarketOrder } = userSecurityInfoSlice.actions;
+export const { updateChartLatestCandle, addCurUserMarketOrder } = tradingSecurityInfoSlice.actions;
 
 /**
  * Redux async thunk for selling security.
@@ -43,7 +47,7 @@ export const updateChartLatestCandleAsync = (chart, candle) => (dispatch, getSta
 
 
 /** Export all SELECTOR FUNCTIONS (only 1 in this case but still helpful) */
-export const getUserSecurityInfo = state => state.userSecurityInfo;
+export const getTradingSecurityInfo = state => state.tradingSecurityInfo;
 
   // Export the generated reducer function
-export default userSecurityInfoSlice.reducer;
+export default tradingSecurityInfoSlice.reducer;
