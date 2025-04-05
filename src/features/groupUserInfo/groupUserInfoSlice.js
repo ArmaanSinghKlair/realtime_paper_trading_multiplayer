@@ -4,7 +4,7 @@ import { generateMediumIntensityColor } from "../../utils/genericUtils";
 
 /** Inital state && theme reducer */
 let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
-let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'gold'));
+let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'darkgreen'));
 
 // let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
 // let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
@@ -18,6 +18,15 @@ const initialState = {
   userSecurityPos:{
     1: JSON.parse(JSON.stringify(userArmaan)),
     2: JSON.parse(JSON.stringify(userNaman))
+  },
+  userInfoObj: {
+    2: {
+      userId: 2,
+      userFirstName: 'Naman',
+      userLastName: 'Rana',
+      username: 'nr_256',
+      userColor: 'darkgreen',
+    }
   }
 }
 const groupUserInfoSlice = createSlice({
@@ -47,6 +56,9 @@ const groupUserInfoSlice = createSlice({
         //action.paylod = UserMarketOrder
         UserSecPosUtils.sellSecurity(action.payload, state.userSecurityPos[action.payload.userId]);
       },
+      setUserInfoObj(state, action){
+        state.userInfoObj[action.payload.userId] = action.payload;  //set user details
+      }
     }
 });
 
@@ -56,6 +68,8 @@ export const { addUser, removeUser, updateUnrealizedPL, buySecurity, sellSecurit
 //Selector
 export const getUserSecurityPositions = state => state.groupUserInfo?.userSecurityPos;
 export const getGroupUserInfo = state => state.groupUserInfo;
+export const getGroupUserDetailInfo = state => getGroupUserInfo(state).userInfoObj;
+
 /**
  * Redux async thunk for selling security.
  * Updates redux state AND updates the candleslick chart as well.
