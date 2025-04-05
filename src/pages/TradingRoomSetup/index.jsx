@@ -2,22 +2,34 @@ import React, { useState } from "react";
 import { Button, Container, Form, InputGroup, Nav, Row, Stack, Tab } from "react-bootstrap";
 import TooltipText from "../../components/common/TooltipText";
 import { InfoCircleFill } from "react-bootstrap-icons";
+import { useDispatch } from "react-redux";
+import { setTradingRoomId } from "../../features/userDetails/userDetailsSlice";
+import { v4 as uuidv4 } from 'uuid';
 
 const TradingRoomSetupContainer = ({headerHeight}) => {
-    const [username, setUsername] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [existingRoomId, setExistingRoomId] = useState('');
+    const storeDispatch = useDispatch();
 
     const bodyHeight = 100-headerHeight;
 
+    /**
+     * Sets the trading room ID to provided ID.
+     * @param {*} event Form submit event.
+     */
     const handleJoinExistingRoomSubmit = (event) =>{
         event.preventDefault();
         event.stopPropagation();
         const form = event.currentTarget;
         if (form.checkValidity()) {
-          //storeDispatch(addUser());
-        }
-        
+          storeDispatch(setTradingRoomId(existingRoomId));
+        } 
+      }
+
+      /**
+       * Creates new trading room with random ID
+       */
+      const createNewRoomHandler = () =>{
+        storeDispatch(setTradingRoomId(uuidv4()))
       }
     return (
         <>
@@ -35,7 +47,9 @@ const TradingRoomSetupContainer = ({headerHeight}) => {
                     variant={`warning`} 
                     className={`w-100 rounded-4`} 
                     size="lg"
-                    type="submit">
+                    type="submit"
+                    onClick={createNewRoomHandler}
+                    >
                         Create New Room 🚀
                     </Button>
                     <Stack className="align-items-center justify-content-center">OR</Stack>
@@ -43,8 +57,8 @@ const TradingRoomSetupContainer = ({headerHeight}) => {
                         <Stack gap={3}>
                             <InputGroup>
                                 <Form.Control
-                                value={username}
-                                onChange={(e)=>{setUsername(e.target.value)}}
+                                value={existingRoomId}
+                                onChange={(e)=>{setExistingRoomId(e.target.value)}}
                                 placeholder="Enter Room Id here"
                                 required
                                 size="lg"

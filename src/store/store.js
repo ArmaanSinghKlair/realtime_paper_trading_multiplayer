@@ -1,27 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-import themeReducer from '../features/theme/themeSlice'
-import userDetailsReducer, { getCurUserDetails, setTradingRoomId } from '../features/userDetails/userDetailsSlice'
-import userSecurityInfoReducer from '../features/userSecurityInfo/userSecurityInfoSlice'
-import groupChatReducer from '../features/groupChat/groupChatSlice'
-import groupUserInfoReducer from '../features/groupUserInfo/groupUserInfoSlice'
+import themeReducer from '../features/theme/themeSlice';
+import tradingRoomInfoReducer, { addUserAsync, appendToTradingRoomGroupChat, removeUserAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
+import userDetailsReducer, { getCurUserDetails, setTradingRoomId } from '../features/userDetails/userDetailsSlice';
+import userSecurityInfoReducer from '../features/userSecurityInfo/userSecurityInfoSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
 
-export const store = configureStore({
-    reducer: {
-      theme: themeReducer,
-      userDetails: userDetailsReducer,
-      userSecurityInfo: userSecurityInfoReducer,
-      groupChat: groupChatReducer,
-      groupUserInfo: groupUserInfoReducer
-    }
-});
-
 /**
+ * Allows access to websocket 3rd party connection through redux actions using middleware thunk
  * Assumes user to be already setup.
  * @param {*} param0 
  * @returns 
  */
-var socket;
 const websocketMiddleware = ({dispatch, getState}) =>{
   let socket = null;
   let lastServerPongTime = null;
@@ -76,9 +65,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
               //moveCursor(payloadObj.userId, payloadObj.x, payloadObj.y);              
             break;
             case WebSocketMessagePayload.TYPE_CD_CHAT_MESSAGE:
-              let userId = payloadObj.userId;
-              let userInfo = userInfoMap.get(userId);
-              addMessage(userId, userInfo.username, payloadObj.chatMessage, messageData.createTimeUtcMs);
+              dispatch(appendToTradingRoomGroupChat(payloadObj))
               break;
           }
         break;
@@ -92,23 +79,21 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           switch(messageData.payload.typeCd){
           case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
             userInfoMap.set(payloadObj.userId, payloadObj);	//add user's info
-            createCursor(payloadObj.userId, payloadObj.firstName)
+            dispatch(addUserAsync(payloadObj))
+            // createCursor(payloadObj.userId, payloadObj.firstName)
             break;
           }
           break;
         case WebSocketMessage.TYPE_CD_UNSUBSCRIBE:
           switch(messageData.payload.typeCd){
             case WebSocketMessagePayload.TYPE_CD_USER_DISCONNECTED:
-              userInfoMap.delete(payloadObj.userId);	//remove user's info
-              removeCursor(payloadObj.userId);
+              dispatch(removeUserAsync(payloadObj))
+              // removeCursor(payloadObj.userId);
               break;
           }
           break;
           
         }
-        
-        // Handle incoming message data
-        //console.log("Received message:", messageData);
     };
     return socket;
   }
@@ -117,6 +102,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
     //skip over websocket creation
     if(!userDetails.userId){
       next(action);
+      return;
     }
     //Initialize websocket if not already
     if(!socket){
@@ -127,7 +113,10 @@ const websocketMiddleware = ({dispatch, getState}) =>{
     if(socket && socket.readyState === WebSocket.OPEN){
       switch(action.type){
         case setTradingRoomId.type:
+          //Triggered when user joins a trading room
+
           if(!action.payload){
+            //happens when user quits a room
             //close and reopen socket.
             //Its a workaround for reregistering sockets. TODO have a better process
             socket.close();
@@ -147,6 +136,19 @@ const websocketMiddleware = ({dispatch, getState}) =>{
             WebSocketUtil.sendMessage(socket, subscriptTopicMsg);
           }
           break;
+        case appendToTradingRoomGroupChat.type:
+          let chatMsg = new WebSocketMessage();
+          chatMsg.typeCd = WebSocketMessage.TYPE_CD_PUBLISH;
+          chatMsg.createSubscriberId = userDetails.userId;
+          chatMsg.targetTopicId = userDetails.curTradingRoomId;
+          chatMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
+          
+          let msgPayload = new WebSocketMessagePayload();
+          msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_CHAT_MESSAGE;
+          msgPayload.payloadValue = JSON.stringify(action.payload);
+          chatMsg.payload = msgPayload;
+          WebSocketUtil.sendMessage(socket, chatMsg);
+          break;
       }
     }
 
@@ -155,3 +157,12 @@ const websocketMiddleware = ({dispatch, getState}) =>{
   }
 }
 
+export const store = configureStore({
+  reducer: {
+    theme: themeReducer,
+    userDetails: userDetailsReducer,
+    userSecurityInfo: userSecurityInfoReducer,
+    tradingRoomInfo: tradingRoomInfoReducer
+  },
+  middleware: (getDefaultMiddleware)=>getDefaultMiddleware().concat(websocketMiddleware)
+});

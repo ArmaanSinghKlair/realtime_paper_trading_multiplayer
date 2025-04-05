@@ -7,10 +7,9 @@ import GroupChatContainer from "./components/GroupChatContainer";
 import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import { addUserAsync, removeUserAsync } from "../../features/groupUserInfo/groupUserInfoSlice";
+import { addUserAsync, removeUserAsync } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
 
 const PaperTrading = ({headerHeight}) => {
-  const candlestickChartRef = useRef(null);
   const storeDispatch = useDispatch();
   const curUserDetails = useSelector(getCurUserDetails);
 
@@ -22,10 +21,10 @@ const PaperTrading = ({headerHeight}) => {
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
   
   useEffect(()=>{
-    storeDispatch(addUserAsync(candlestickChartRef.current, curUserDetails));
+    storeDispatch(addUserAsync(curUserDetails));
 
     return ()=>{
-      storeDispatch(removeUserAsync(candlestickChartRef.current, curUserDetails));
+      storeDispatch(removeUserAsync(curUserDetails));
     }
   }, []);
   return <>
@@ -39,7 +38,7 @@ const PaperTrading = ({headerHeight}) => {
                 {/** Chart Container (LEFT TOP) */}
                 <Col xs={12} style={{height: chartContainerHeightPer+"%"}} className="py-2">
                   <Container fluid className={`h-100 app-card rounded-4`}>
-                    <ChartContainer candlestickChartRef={candlestickChartRef} />
+                    <ChartContainer />
                   </Container>
                 </Col>
 
@@ -58,7 +57,7 @@ const PaperTrading = ({headerHeight}) => {
                 {/** Buy Sell (LEFT TOP) */}
                 <Col xs={12} style={{height: buySellPanelHeightPer+"%"}} className="py-2">
                   <Container  fluid className={`h-100 bg-body-secondary bg-opacity-50 app-card rounded-4`}>
-                    <SecurityBuySellContainer candlestickChartRef={candlestickChartRef} />
+                    <SecurityBuySellContainer />
                   </Container>
                 </Col>
 

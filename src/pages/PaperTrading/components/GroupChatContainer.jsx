@@ -2,22 +2,20 @@ import React, { useEffect, useRef } from "react";
 import { Container, Stack } from "react-bootstrap";
 import { ChatDotsFill, SendFill } from "react-bootstrap-icons";
 import { useSelector } from "react-redux";
-import { getGroupChats } from "../../../features/groupChat/groupChatSlice";
-import { ICON_SMALL_SIZE } from "../../../styles/constants";
-import { generateMediumIntensityColor } from "../../../utils/genericUtils";
+import { getTradingRoomGroupChats, getTradingRoomUsersInfo } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
-import { getGroupUserDetailInfo, getGroupUserInfo } from "../../../features/groupUserInfo/groupUserInfoSlice";
+import { ICON_SMALL_SIZE } from "../../../styles/constants";
 
 const GroupChatContainer = () => {
   const curUserDetails = useSelector(getCurUserDetails);
-  const groupUsersInfoDetail = useSelector(getGroupUserDetailInfo);
+  const tradingRoomUserDetails = useSelector(getTradingRoomUsersInfo);
 
   const sendChatRef = useRef(null);
   useEffect(()=>{
     sendChatRef.current.focus();
   }, []);
 
-  const messages = useSelector(getGroupChats);
+  const messages = useSelector(getTradingRoomGroupChats);
   return <>
     <Stack className="h-100">
       <Container fluid style={{height: '10%'}} className="px-0">
@@ -31,7 +29,7 @@ const GroupChatContainer = () => {
             <Container fluid className="overflow-auto h-100">
               {
                 messages.map(msg=>{
-                  let userInfoObj = msg.userId == curUserDetails.userId ? curUserDetails : groupUsersInfoDetail[msg.userId];
+                  let userInfoObj = msg.userId == curUserDetails.userId ? curUserDetails : tradingRoomUserDetails[msg.userId];
                   return (
                   <Stack direction="horizontal" className="pt-2" gap={2} key={msg.msgId}>
                     <div className={`app-initials-profile-icon app-initials-profile-icon-md align-self-start`} style={{backgroundColor: userInfoObj.userColor}}>{userInfoObj.username.charAt(0)}</div>

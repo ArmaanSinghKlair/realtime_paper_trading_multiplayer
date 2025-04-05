@@ -17,7 +17,6 @@ const userDetailsSlice = createSlice({
     reducers: {
       setUserDetails: {
         reducer: (state, action) => {
-          console.log('Got here as well AFTER prepare in REDUCER', action);
           return {
             ...state,
             ...action.payload
@@ -25,7 +24,6 @@ const userDetailsSlice = createSlice({
         },
         //Adds a unique ID to each user. 
         prepare: (firstName, lastName, username) => {
-          console.log('got here in prepare functions');
           return {
             payload: {
               userId: uuidv4(),

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import PriceNumberFormatter from '../../../components/common/PriceNumberFormattter';
 import { RedGreenText } from '../../../components/common/RedGreenText';
 import TooltipText from '../../../components/common/TooltipText';
-import { getGroupUserInfo } from '../../../features/groupUserInfo/groupUserInfoSlice';
+import { getTradingRoomInfo } from '../../../features/tradingRoomInfo/tradingRoomInfoSlice';
 import { getCurUserDetails } from '../../../features/userDetails/userDetailsSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { UserSecPosUtils } from '../../../utils/candlestickChart';
@@ -14,9 +14,9 @@ import SecuritySummaryTab from './SecuritySummaryTab';
 export const UserSecurityPosContainer = () => {
     const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
     const curUserDetails = useSelector(getCurUserDetails);
-    const groupUsersInfo = useSelector(getGroupUserInfo);
+    const tradingRoomInfo = useSelector(getTradingRoomInfo);
 
-    const curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails?.userId];
+    const curSecurityDetails = tradingRoomInfo?.userSecurityPos[curUserDetails?.userId];
 
     return <>
     <Stack direction='horizontal' className='mb-2'>

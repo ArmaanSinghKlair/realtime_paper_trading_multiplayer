@@ -17,13 +17,9 @@ function UserSetupContainer({headerHeight}) {
     event.stopPropagation();
     const form = event.currentTarget;
     if (form.checkValidity()) {
-      storeDispatch(addUser());
+      storeDispatch(setUserDetails(firstName, lastName, username));
     }
     
-  }
-
-  const addUser = () => (dispatch, getState) =>{
-    dispatch(setUserDetails(firstName, lastName, username));    
   }
   return (
     <>

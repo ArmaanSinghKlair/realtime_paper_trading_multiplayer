@@ -3,19 +3,19 @@ import { useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
 import { RedGreenText } from "../../../components/common/RedGreenText";
-import { getGroupUserInfo } from "../../../features/groupUserInfo/groupUserInfoSlice";
+import { getTradingRoomInfo } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 import { getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { UserSecPosUtils } from "../../../utils/candlestickChart";
 
 const UserSecPosTable = () => {
     const userSecPosObj = useSelector(getUserSecurityInfo);
-    const groupUsersInfo = useSelector(getGroupUserInfo);
+    const tradingRoomInfo = useSelector(getTradingRoomInfo);
     const curUserDetails = useSelector(getCurUserDetails);
     let secPosTableContent = null;
     
-    if(curUserDetails.userId && groupUsersInfo?.userSecurityPos[curUserDetails.userId] && groupUsersInfo?.userSecurityPos[curUserDetails.userId]?.ownedQuantity != 0){
-        let curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails.userId];
+    if(curUserDetails.userId && tradingRoomInfo?.userSecurityPos[curUserDetails.userId] && tradingRoomInfo?.userSecurityPos[curUserDetails.userId]?.ownedQuantity != 0){
+        let curSecurityDetails = tradingRoomInfo?.userSecurityPos[curUserDetails.userId];
         secPosTableContent =  (
         <tr>
             <td>{userSecPosObj.curSecurityDetails.symbol}</td>

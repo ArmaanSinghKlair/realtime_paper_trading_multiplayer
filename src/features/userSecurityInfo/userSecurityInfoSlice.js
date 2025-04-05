@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { UserSecPosUtils, UserSecurityPriceData } from "../../utils/candlestickChart";
-import { getUserSecurityPositions, updateUnrealizedPL } from "../groupUserInfo/groupUserInfoSlice";
+import { getUserSecurityPositions, updateUnrealizedPL } from "../tradingRoomInfo/tradingRoomInfoSlice";
 
 /** Inital state && theme reducer */
 let ethSec = new UserSecurityPriceData('COINBASE:ETHUSD', 'Ethereum / U.S. Dollar', 0.0001);

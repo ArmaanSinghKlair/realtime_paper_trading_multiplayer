@@ -3,7 +3,7 @@ import { Container, Stack } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
-import { getUserSecurityPositions } from '../../../features/groupUserInfo/groupUserInfoSlice';
+import { getUserSecurityPositions } from '../../../features/tradingRoomInfo/tradingRoomInfoSlice';
 import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
 import { updateChartLatestCandleAsync } from '../../../features/userSecurityInfo/userSecurityInfoSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
@@ -15,7 +15,7 @@ const PAPER_TRADING_STATES = {
   STARTED: 'STARTED',
   FINISHED: 'FINISHED'
 }
-const ChartContainer = ({candlestickChartRef}) => {
+const ChartContainer = ({}) => {
   const [paperTradingState, setPaperTradingState] = useState(PAPER_TRADING_STATES.STARTED);
   const curOhlcTradingDataRef = useRef(null);
 
@@ -29,10 +29,11 @@ const ChartContainer = ({candlestickChartRef}) => {
   useEffect(()=>{
     const chartRect = chartContainerRef.current.getBoundingClientRect();
     const chart = new CandlestickChart({chartContainerId: chartContainerId, chartContainerWidth: chartRect.width, chartContainerHeight: chartRect.height});
-    candlestickChartRef.current = chart;
+    window.candlestickChart = chart;
     return ()=>{
       //safely remove chart an any event listeners on unmount
       chart.removeChart();
+      window.candlestickChart = null;
     }
   },[]);
 
@@ -67,14 +68,14 @@ const ChartContainer = ({candlestickChartRef}) => {
         userSecPopoverBgColor: '#fff',
       };
     }
-    candlestickChartRef.current?.setCandlestickTheme(themeObj);
+    window.candlestickChart?.setCandlestickTheme(themeObj);
   },[currentTheme]);
 
   //Initialize already stored users
   useEffect(()=>{
     // console.log(userSecPosMap);
     if(userSecPosObj){
-      candlestickChartRef.current.updateUserSecPos(userSecPosObj);
+      window.candlestickChart.updateUserSecPos(userSecPosObj);
     }
   }, [userSecPosObj]);
 
@@ -91,11 +92,11 @@ const ChartContainer = ({candlestickChartRef}) => {
           //prefill 10 mins
           let curCandleIndex=0;
           for(let i=0;i<curCandleIndex;i++){
-            candlestickChartRef.current.updateLatestCandle(curOhlcTradingDataRef.current[i]);
+            window.candlestickChart.updateLatestCandle(curOhlcTradingDataRef.current[i]);
           }
            
           simulateFuncInterval = setInterval(()=>{
-            storeDispatch(updateChartLatestCandleAsync(candlestickChartRef.current, curOhlcTradingDataRef.current[curCandleIndex]))
+            storeDispatch(updateChartLatestCandleAsync(window.candlestickChart, curOhlcTradingDataRef.current[curCandleIndex]))
             curCandleIndex++;
           }, 1000); 
         }

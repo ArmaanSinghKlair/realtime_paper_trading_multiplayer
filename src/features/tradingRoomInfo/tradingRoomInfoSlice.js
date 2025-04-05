@@ -19,7 +19,7 @@ const initialState = {
     1: JSON.parse(JSON.stringify(userArmaan)),
     2: JSON.parse(JSON.stringify(userNaman))
   },
-  userInfoObj: {
+  userDetails: {
     2: {
       userId: 2,
       userFirstName: 'Naman',
@@ -27,16 +27,36 @@ const initialState = {
       username: 'nr_256',
       userColor: 'darkgreen',
     }
-  }
+  },
+  groupChats:[
+    {
+      userId: 2,
+      msgId: '1-a',
+      message: `Yo wassup people! Ready to make some money?? 🚀🚀`,
+      timestamp: new Date(Date.now()-(10*60*1000)).valueOf() //x mins ago
+    },
+    {
+      userId: 1,
+      msgId: '2-a',
+      message: `You bet bruv`,
+      timestamp: new Date(Date.now()-(9*60*1000)).valueOf() //x mins ago
+    },
+    {
+      userId: 2,
+      msgId: '3-a',
+      message: `What strategy we're gonna test today though?`,
+      timestamp: new Date(Date.now()-(10*60*1000)).valueOf() //x mins ago
+    },
+    ]
 }
-const groupUserInfoSlice = createSlice({
-    name: 'groupUserInfo',
+const tradingRoomInfoSlice = createSlice({
+    name: 'tradingRoomInfo',
     initialState,
     reducers: {
       addUser(state, action){
         const {userId, username, userFirstName, userLastName} = action.payload;
-        let userInfoObj = new UserInfoSecPos(userId, username, userFirstName, userLastName, generateMediumIntensityColor());
-        state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfoObj)));
+        let userInfo = new UserInfoSecPos(userId, username, userFirstName, userLastName, generateMediumIntensityColor());
+        state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfo)));
       },
       removeUser(state, action){
         const {userId} = action.payload;
@@ -56,19 +76,24 @@ const groupUserInfoSlice = createSlice({
         //action.paylod = UserMarketOrder
         UserSecPosUtils.sellSecurity(action.payload, state.userSecurityPos[action.payload.userId]);
       },
-      setUserInfoObj(state, action){
-        state.userInfoObj[action.payload.userId] = action.payload;  //set user details
+      addUpdateTradingRoomUser(state, action){
+        state.userDetails[action.payload.userId] = action.payload;  //set user details
+      },
+      //adds gruop chat
+      appendToTradingRoomGroupChat(state, action){
+        state.groupChats.push(action.payload);
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { addUser, removeUser, updateUnrealizedPL, buySecurity, sellSecurity } = groupUserInfoSlice.actions;
+export const { addUser, removeUser, updateUnrealizedPL, buySecurity, sellSecurity, addUpdateTradingRoomUser, appendToTradingRoomGroupChat } = tradingRoomInfoSlice.actions;
 
 //Selector
-export const getUserSecurityPositions = state => state.groupUserInfo?.userSecurityPos;
-export const getGroupUserInfo = state => state.groupUserInfo;
-export const getGroupUserDetailInfo = state => getGroupUserInfo(state).userInfoObj;
+export const getTradingRoomInfo = state => state.tradingRoomInfo;
+export const getUserSecurityPositions = state => getTradingRoomInfo(state)?.userSecurityPos;
+export const getTradingRoomUsersInfo = state => getTradingRoomInfo(state).userDetails;
+export const getTradingRoomGroupChats = (state) => getTradingRoomInfo(state).groupChats;
 
 /**
  * Redux async thunk for selling security.
@@ -77,9 +102,9 @@ export const getGroupUserDetailInfo = state => getGroupUserInfo(state).userInfoO
  * @param {*} userInfo UserInfoSecPos 
  * @returns 
  */
-export const addUserAsync = (chart, userInfo) => (dispatch, getState) =>{
+export const addUserAsync = (userInfo) => (dispatch, getState) =>{
   dispatch(addUser(userInfo));
-  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
+  window.candlestickChart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -89,9 +114,9 @@ export const addUserAsync = (chart, userInfo) => (dispatch, getState) =>{
  * @param {*} param1 
  * @returns 
  */
-export const removeUserAsync = (chart, userInfo) => (dispatch, getState) =>{
+export const removeUserAsync = (userInfo) => (dispatch, getState) =>{
   dispatch(removeUser(userInfo));
-  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
+  window.candlestickChart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -119,4 +144,4 @@ export const sellSecurityAsync = (chart, userMarketOrder) => (dispatch, getState
 }
 
 // Export the generated reducer function
-export default groupUserInfoSlice.reducer;
+export default tradingRoomInfoSlice.reducer;

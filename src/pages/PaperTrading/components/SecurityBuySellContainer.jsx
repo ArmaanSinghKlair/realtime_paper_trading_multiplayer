@@ -3,7 +3,7 @@ import { Button, Col, Container, Form, InputGroup, Row, Stack } from "react-boot
 import { CalculatorFill } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
-import { buySecurityAsync, getGroupUserInfo, sellSecurityAsync } from "../../../features/groupUserInfo/groupUserInfoSlice";
+import { buySecurityAsync, getTradingRoomInfo, sellSecurityAsync } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 import { addCurUserMarketOrder, getUserSecurityInfo } from "../../../features/userSecurityInfo/userSecurityInfoSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
@@ -13,12 +13,12 @@ const BUY_SELL_TAB_STATE = {
   BUY: "BUY",
   SELL: "SELL"
 }
-const SecurityBuySellContainer = ({candlestickChartRef}) => {
+const SecurityBuySellContainer = () => {
   const userSecPosObj = useSelector(getUserSecurityInfo);
-  const groupUsersInfo = useSelector(getGroupUserInfo);
+  const tradingRoomInfo = useSelector(getTradingRoomInfo);
 
   const curUserDetails = useSelector(getCurUserDetails);
-  const curSecurityDetails = groupUsersInfo?.userSecurityPos[curUserDetails?.userId];
+  const curSecurityDetails = tradingRoomInfo?.userSecurityPos[curUserDetails?.userId];
   const [errMsg, setErrMsg] = useState(null);
   const [units, setUnits] = useState(1);
   const [buySellTabState, setBuySellTabState] = useState(BUY_SELL_TAB_STATE.BUY);
@@ -56,9 +56,9 @@ const SecurityBuySellContainer = ({candlestickChartRef}) => {
       marketOrder.status = UserMarketOrder.ORDER_STATUS_TYPE.REJECTED;
     } else {
       if(isBuyOrder){
-        storeDispatch(buySecurityAsync(candlestickChartRef.current, JSON.parse(JSON.stringify(marketOrder))));
+        storeDispatch(buySecurityAsync(window.candlestickChart, JSON.parse(JSON.stringify(marketOrder))));
       } else {
-        storeDispatch(sellSecurityAsync(candlestickChartRef.current, JSON.parse(JSON.stringify(marketOrder))));
+        storeDispatch(sellSecurityAsync(window.candlestickChart, JSON.parse(JSON.stringify(marketOrder))));
       }
     }
     storeDispatch(addCurUserMarketOrder(JSON.parse(JSON.stringify(marketOrder)))); 
