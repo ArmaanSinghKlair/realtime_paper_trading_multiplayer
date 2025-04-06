@@ -7,7 +7,8 @@ import GroupChatContainer from "./components/GroupChatContainer";
 import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import { addUserAsync, removeUserAsync } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
+import { joinTradingRoomCurUserAsync, leaveTradingRoomCurUserAsync } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
+import { generateMediumIntensityColor } from "../../utils/genericUtils";
 
 const PaperTrading = ({headerHeight}) => {
   const storeDispatch = useDispatch();
@@ -21,10 +22,10 @@ const PaperTrading = ({headerHeight}) => {
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
   
   useEffect(()=>{
-    storeDispatch(addUserAsync(curUserDetails));
+    storeDispatch(joinTradingRoomCurUserAsync(curUserDetails));
 
     return ()=>{
-      storeDispatch(removeUserAsync(curUserDetails));
+      storeDispatch(leaveTradingRoomCurUserAsync(curUserDetails.userId));
     }
   }, []);
   return <>

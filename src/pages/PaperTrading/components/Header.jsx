@@ -1,14 +1,17 @@
 import React from "react";
-import { Stack } from "react-bootstrap";
+import { Form, InputGroup, Stack } from "react-bootstrap";
 import { LightningChargeFill } from "react-bootstrap-icons";
+import InputGroupText from "react-bootstrap/esm/InputGroupText";
 import { useSelector } from "react-redux";
-import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import { getCurrentTheme } from "../../../features/theme/themeSlice";
-import ThemeToggle from './ThemeToggle';
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
+import { ICON_SMALL_SIZE } from "../../../styles/constants";
+import CopyTextIcon from "./CopyTextIcon";
+import ThemeToggle from './ThemeToggle';
 
 const Header = ({headerHeight}) => {
     const currentTheme = useSelector(getCurrentTheme);
+    const curUserDetailsInfo = useSelector(getCurUserDetails);
     const {userId, userFirstName, userLastName, userColor} = useSelector(getCurUserDetails);
 
     return <Stack direction="horizontal" className={`align-items-center`} gap={3} style={{height:headerHeight+"vh"}}>
@@ -18,7 +21,16 @@ const Header = ({headerHeight}) => {
                 <span>Jam & Trade with Pals.</span>
             </Stack>
 
-            <ThemeToggle rootElClassName="ms-auto" />
+            {curUserDetailsInfo.curTradingRoomId 
+            && <InputGroup className="ms-auto w-25">
+                <Form.Control 
+                    disabled
+                    value={curUserDetailsInfo.curTradingRoomId}/>
+                <InputGroupText style={{cursor: 'pointer'}}>
+                    <CopyTextIcon copyText={curUserDetailsInfo.curTradingRoomId}/>
+                </InputGroupText>
+                </InputGroup>}
+            <ThemeToggle rootElClassName={`${!curUserDetailsInfo.curTradingRoomId && 'ms-auto'}`} />
             {userId && <div className={`app-initials-profile-icon app-initials-profile-icon-lg`} style={{backgroundColor: userColor}}>{userFirstName.charAt(0)+""+userLastName.charAt(0)}</div>}
           </Stack>;
 };

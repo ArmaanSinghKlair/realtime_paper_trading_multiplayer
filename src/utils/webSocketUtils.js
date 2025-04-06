@@ -71,7 +71,7 @@ export class WebSocketUtil {
 	 * Util class for sending websocket messages
 	 */
 	static sendMessage(socket, payload, successFn, failureFn) {
-	    if (socket.readyState === WebSocket.OPEN) {
+	    if (socket?.readyState === WebSocket.OPEN) {
 			try{
 	        	socket.send(JSON.stringify(payload));
 				if(successFn){

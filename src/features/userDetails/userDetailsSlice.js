@@ -4,12 +4,12 @@ import { generateMediumIntensityColor } from "../../utils/genericUtils";
 
 /** Inital state && theme reducer */
 const initialState = {
-    userId: 1,
-    userFirstName: 'Armaan',
-    userLastName: 'Klair',
-    username: 'Ak_47_',
-    userColor: generateMediumIntensityColor(),
-    curTradingRoomId: 1,
+    // userId: 1,
+    // userFirstName: 'Armaan',
+    // userLastName: 'Klair',
+    // username: 'Ak_47_',
+    // userColor: generateMediumIntensityColor(),
+    // curTradingRoomId: null,
 }
 const userDetailsSlice = createSlice({
     name: 'userDetails',

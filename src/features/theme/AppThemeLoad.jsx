@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { updateThemeAsync } from './themeSlice';
+import { THEME_SLICE_VALUES, updateThemeAsync } from './themeSlice';
 import { LOCAL_CACHE_THEME_SLICE_KEY } from '../../store/storeConstants';
 
 /**

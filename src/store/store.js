@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
-import tradingRoomInfoReducer, { addUserAsync, appendToTradingRoomGroupChat, removeUserAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
-import userDetailsReducer, { getCurUserDetails, setTradingRoomId } from '../features/userDetails/userDetailsSlice';
+import tradingRoomInfoReducer, { getTradingRoomGroupChats, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
 import tradingSecurityInfoReducer from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
+import userDetailsReducer, { getCurUserDetails, setUserDetails } from '../features/userDetails/userDetailsSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
 
 /**
@@ -16,7 +16,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
   let lastServerPongTime = null;
   let currentlyCatchingUp = false;
   const topicPrevPersistenceMap = new Map();  //store last received msgId for a topicId
-  const userDetails = getCurUserDetails(getState());
+  
   
   const initializeWebsocket = (userId) =>{
     let socket = new WebSocket("ws://127.0.0.1/ws-service/websocket?userId="+userId);
@@ -28,115 +28,146 @@ const websocketMiddleware = ({dispatch, getState}) =>{
     };
 
     socket.onmessage = function(event) {
+      const userDetails = getCurUserDetails(getState());
+      const curTradingGroupMsgs = getTradingRoomGroupChats(getState());
+
       const messageData = JSON.parse(event.data);
       if(messageData.createSubscriberId == userDetails.userId){
-      return;	//ignore messages created by myself. These messages may be useful in missed messages catchup
+        // return;	//ignore messages created by myself. These messages may be useful in missed messages catchup
       }
       let payloadObj = null;
       if(messageData?.payload?.payloadValue){
         payloadObj = JSON.parse(messageData.payload.payloadValue);
       }
-      
-      if(messageData.persistentMsgCd == 1){
-        console.log(messageData);
+
+      //check if persistent messages lost or not
+      if(messageData.previousPersistenceId){
+        console.log('Got persistenet msg', messageData);
+        //server in-midst of catching up lost persistent messages. When catchUp complete, then we can start accepting messages again.
+        if(currentlyCatchingUp){
+          return;
+        }
+        let storedPrevPersistenceId = topicPrevPersistenceMap.get(messageData.targetTopicId);
+        if(storedPrevPersistenceId != messageData.previousPersistenceId){
+          currentlyCatchingUp = true; //start catching up
+          //notify server to rewind message stream to our last seen message and start sending messages from there
+          let catchupMsg = new WebSocketMessage();
+          catchupMsg.typeCd = WebSocketMessage.TYPE_CD_CATCHUP_REQUEST;
+          catchupMsg.createSubscriberId = userDetails.userId;
+          catchupMsg.targetTopicId = messageData.targetTopicId;
+          catchupMsg.prevousPersistenceId = storedPrevPersistenceId;
+          WebSocketUtil.sendMessage(socket, catchupMsg);
+          return;
+        }
       }
+      if(messageData.persistenceId){
+        topicPrevPersistenceMap.set(messageData.targetTopicId, messageData.persistenceId);
+      }
+
       switch(messageData.typeCd){
         case WebSocketMessage.TYPE_CD_PUBLISH:
-          //check if persistent messages lost or not
-          if(messageData.previousPersistenceId){
-            let storedPrevPersistenceId = topicPrevPersistenceMap.get(messageData.targetTopicId);
-            if(storedPrevPersistenceId != messageData.previousPersistenceId){
-              //server in-midst of catching up lost messages. When catchUp complete, then we can start accepting messages again.
-              if(currentlyCatchingUp){
-                return;
-              }
-              //notify server to rewind message stream to our last seen message and start sending messages from there
-              let catchupMsg = new WebSocketMessage();
-              catchupMsg.typeCd = WebSocketMessage.TYPE_CD_CATCHUP_REQUEST;
-              catchupMsg.createSubscriberId = userDetails.userId;
-              catchupMsg.targetTopicId = messageData.targetTopicId;
-              catchupMsg.prevousPersistenceId = storedPrevPersistenceId;
-              WebSocketUtil.sendMessage(socket, catchupMsg);
-              return;
-            }
-          }
           switch(messageData.payload.typeCd){
             case WebSocketMessagePayload.TYPE_CD_MOUSE_COORDINATES:
-              //moveCursor(payloadObj.userId, payloadObj.x, payloadObj.y);              
+              if(messageData.createSubscriberId != userDetails.userId){
+                //moveCursor(payloadObj.userId, payloadObj.x, payloadObj.y);              
+              }
             break;
             case WebSocketMessagePayload.TYPE_CD_CHAT_MESSAGE:
-              dispatch(appendToTradingRoomGroupChat(payloadObj))
-              break;
+              if(!curTradingGroupMsgs || curTradingGroupMsgs.filter(msg=>msg.msgId == payloadObj.msgId).length==0){
+                dispatch(wsAppendToTradingRoomGroupChat(payloadObj))
+              }
+            break;
           }
         break;
         case WebSocketMessage.TYPE_CD_PONG:
           lastServerPongTime = messageData.createTimeUtcMs;
-          break;
+        break;
         case WebSocketMessage.TYPE_CD_CATCHUP_COMPLETE:
           currentlyCatchingUp = false;
-          break;
+        break;
         case WebSocketMessage.TYPE_CD_SUBSCRIBE:
-          switch(messageData.payload.typeCd){
+        if(messageData.createSubscriberId == userDetails.userId){
+          break;
+        }
+
+        switch(messageData.payload.typeCd){
           case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
-            userInfoMap.set(payloadObj.userId, payloadObj);	//add user's info
-            dispatch(addUserAsync(payloadObj))
+            dispatch(wsAddUserToTradingRoomAsync(payloadObj))
             // createCursor(payloadObj.userId, payloadObj.firstName)
+          break;
+        }
+        break;
+        case WebSocketMessage.TYPE_CD_UNSUBSCRIBE:
+          if(messageData.createSubscriberId == userDetails.userId){
             break;
           }
-          break;
-        case WebSocketMessage.TYPE_CD_UNSUBSCRIBE:
+
           switch(messageData.payload.typeCd){
             case WebSocketMessagePayload.TYPE_CD_USER_DISCONNECTED:
-              dispatch(removeUserAsync(payloadObj))
+              dispatch(wsRemoveUserFromTradingRoomAsync(payloadObj))
               // removeCursor(payloadObj.userId);
               break;
           }
-          break;
-          
-        }
+        break;
+      }
     };
     return socket;
   }
 
   return next => action =>{
-    //skip over websocket creation
-    if(!userDetails.userId){
-      next(action);
-      return;
-    }
-    //Initialize websocket if not already
-    if(!socket){
+    const userDetails = getCurUserDetails(getState());
+    //TODO: Remove. Only for testing purposes
+    if(userDetails.userId && !socket){
       socket = initializeWebsocket(userDetails.userId, dispatch, getState);
     }
 
-    //Handle action
-    if(socket && socket.readyState === WebSocket.OPEN){
-      switch(action.type){
-        case setTradingRoomId.type:
-          //Triggered when user joins a trading room
-
-          if(!action.payload){
-            //happens when user quits a room
-            //close and reopen socket.
-            //Its a workaround for reregistering sockets. TODO have a better process
-            socket.close();
-            socket = initializeWebsocket(userDetails.userId);
-          } else{
+    //Send ws message whenever certain actions are dispatched
+    switch(action.type){
+      case setUserDetails.type:
+        let userId = action.payload.userId;
+        //Initialize websocket if not already when user is set
+        if(!socket){
+          socket = initializeWebsocket(userId, dispatch, getState);
+        }
+        break;
+      case joinTradingRoomCurUser.type:
+        //Triggered when user JOINS a trading room
+        {
+          console.log('joing curUser trading room!!!');
+          //register subscribe to tradingRoom
+          let subscriptTopicMsg = new WebSocketMessage();
+          subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
+          subscriptTopicMsg.createSubscriberId = userDetails.userId;
+          subscriptTopicMsg.targetTopicId = userDetails.curTradingRoomId;
+          subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
+          
+          let msgPayload = new WebSocketMessagePayload();
+          msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
+          msgPayload.payloadValue = JSON.stringify(action.payload);
+          subscriptTopicMsg.payload = msgPayload;
+          WebSocketUtil.sendMessage(socket, subscriptTopicMsg);
+        }
+        break;
+        case leaveTradingRoomCurUser.type:
+          //Triggered when user LEAVES a trading room
+          {
+            console.log('leaving curUser trading room!!!');
             //register subscribe to tradingRoom
             let subscriptTopicMsg = new WebSocketMessage();
             subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
             subscriptTopicMsg.createSubscriberId = userDetails.userId;
-            subscriptTopicMsg.targetTopicId = action.payload;
+            subscriptTopicMsg.targetTopicId = userDetails.curTradingRoomId;
             subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
             
             let msgPayload = new WebSocketMessagePayload();
-            msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
-            msgPayload.payloadValue = JSON.stringify({ userId: userDetails.userId, username: userDetails.username, firstName: userDetails.userFirstName, lastName: userDetails.userLastName});
+            msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_DISCONNECTED;
+            msgPayload.payloadValue = JSON.stringify(action.payload); //userId
             subscriptTopicMsg.payload = msgPayload;
             WebSocketUtil.sendMessage(socket, subscriptTopicMsg);
           }
           break;
-        case appendToTradingRoomGroupChat.type:
+      case userAddNewGroupChat.type:
+        {
           let chatMsg = new WebSocketMessage();
           chatMsg.typeCd = WebSocketMessage.TYPE_CD_PUBLISH;
           chatMsg.createSubscriberId = userDetails.userId;
@@ -148,9 +179,10 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           msgPayload.payloadValue = JSON.stringify(action.payload);
           chatMsg.payload = msgPayload;
           WebSocketUtil.sendMessage(socket, chatMsg);
-          break;
-      }
+        }
+        break;
     }
+    
 
     //Continue to next middleware in chain
     next(action);

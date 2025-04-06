@@ -7,9 +7,10 @@ import { v4 } from "uuid";
  * @param {*} param0 
  * @returns 
  */
-const TooltipText = ({children, title}) => {
+const TooltipText = ({children, title }) => {
     return (
-        <OverlayTrigger overlay={<Tooltip id={v4()}>{title}</Tooltip>}>
+        <OverlayTrigger  
+            overlay={<Tooltip key={title} id={v4()}>{title}</Tooltip>}>
             {children}
         </OverlayTrigger>
     )

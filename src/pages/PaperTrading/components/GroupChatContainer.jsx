@@ -1,20 +1,30 @@
-import React, { useEffect, useRef } from "react";
-import { Container, Stack } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Container, Form, Stack } from "react-bootstrap";
 import { ChatDotsFill, SendFill } from "react-bootstrap-icons";
-import { useSelector } from "react-redux";
-import { getTradingRoomGroupChats, getTradingRoomUsersInfo } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { userAddNewGroupChatAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 
 const GroupChatContainer = () => {
   const curUserDetails = useSelector(getCurUserDetails);
   const tradingRoomUserDetails = useSelector(getTradingRoomUsersInfo);
-
+  const [newChatMsg, setNewChatMsg] = useState('');
   const sendChatRef = useRef(null);
+  const storeDispatch = useDispatch();
+
   useEffect(()=>{
     sendChatRef.current.focus();
   }, []);
 
+  const handleSendChatMsgSubmit = (event) =>{
+    event.preventDefault();
+    event.stopPropagation();
+    const form = event.currentTarget;
+    if (form.checkValidity()) {
+      storeDispatch(userAddNewGroupChatAsync(newChatMsg));
+    } 
+  }
   const messages = useSelector(getTradingRoomGroupChats);
   return <>
     <Stack className="h-100">
@@ -46,10 +56,17 @@ const GroupChatContainer = () => {
               
             </Container>
           </Stack>
-          <Stack className="mt-auto bg-body-secondary rounded-bottom-4 border px-4" style={{height: '15%'}} direction="horizontal" gap={2}>
-            <input ref={sendChatRef} className="flex-grow-1 app-input-no-style" type="text" placeholder="Send Message..."></input>
-            <SendFill style={{width: ICON_SMALL_SIZE, height: ICON_SMALL_SIZE}} className="cursor-pointer app-hover-dull"/>
-          </Stack>
+          <Form className="mt-auto bg-body-secondary rounded-bottom-4 border px-4 d-flex justify-content-between align-items-center gap-2" style={{height: '15%'}} onSubmit={handleSendChatMsgSubmit}>
+            <Form.Control
+              value={newChatMsg}
+              className="flex-grow-1 app-input-no-style"
+              onChange={(e)=>setNewChatMsg(e.target.value)}
+              ref={sendChatRef}
+              placeholder="Send Message..."
+              required
+              />
+            <Button className="app-input-no-style" type="submit"><SendFill style={{width: ICON_SMALL_SIZE, height: ICON_SMALL_SIZE}} role="button" className="cursor-pointer app-hover-dull"/></Button>
+          </Form>
         </Container>
       </Stack>
   </>;
