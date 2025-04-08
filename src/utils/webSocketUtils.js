@@ -40,7 +40,8 @@ export class WebSocketMessagePayload {
 	static TYPE_CD_CHAT_MESSAGE = 1;	// {userId: 123, groupId: 123, chatMessage: 'chat message'}
 	static TYPE_CD_USER_CONNECTED = 2;	//{userId:123, username: 'username'}
 	static TYPE_CD_USER_DISCONNECTED = 3;	//{userId:123}
-			
+	static TYPE_CD_TRADING_ROOM_START_FLAG = 4;	//{{startTimestamp}
+	
 	typeCd;
 	payloadValue;
 }

@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from 'uuid';
-import { generateMediumIntensityColor } from "../../utils/genericUtils";
+import { createRandomString, generateMediumIntensityColor } from "../../utils/genericUtils";
 
 /** Inital state && theme reducer */
 const initialState = {
@@ -9,7 +8,7 @@ const initialState = {
     // userLastName: 'Klair',
     // username: 'Ak_47_',
     // userColor: generateMediumIntensityColor(),
-    // curTradingRoomId: null,
+    // curTradingRoomId: 1,
 }
 const userDetailsSlice = createSlice({
     name: 'userDetails',
@@ -26,7 +25,7 @@ const userDetailsSlice = createSlice({
         prepare: (firstName, lastName, username) => {
           return {
             payload: {
-              userId: uuidv4(),
+              userId: createRandomString(),
               userFirstName: firstName,
               userLastName: lastName,
               username: username,

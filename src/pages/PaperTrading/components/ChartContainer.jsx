@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Container, Stack } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import SecurityIcon from '../../../assets/ethereum-logo.svg?react';
 import ohlcDataArrCsv from '../../../assets/security_prices/eth_cad_1/2021-05-01.csv?raw';
-import { getUserSecurityPositions } from '../../../features/tradingRoomInfo/tradingRoomInfoSlice';
 import { getCurrentTheme, THEME_SLICE_VALUES } from '../../../features/theme/themeSlice';
+import { getTradingRoomUtcStartTime, getUserSecurityPositions } from '../../../features/tradingRoomInfo/tradingRoomInfoSlice';
 import { updateChartLatestCandleAsync } from '../../../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { CandlestickChart } from '../../../utils/candlestickChart';
@@ -16,14 +16,23 @@ const PAPER_TRADING_STATES = {
   FINISHED: 'FINISHED'
 }
 const ChartContainer = ({}) => {
-  const [paperTradingState, setPaperTradingState] = useState(PAPER_TRADING_STATES.STARTED);
   const curOhlcTradingDataRef = useRef(null);
 
   const currentTheme = useSelector(getCurrentTheme);
   const userSecPosObj = useSelector(getUserSecurityPositions);
+  const tradingRoomUtcStartTime = useSelector(getTradingRoomUtcStartTime);
   const storeDispatch = useDispatch();
   const chartContainerRef = useRef(null);
+
   const chartContainerId = "candlestickChartContainer";
+
+  let paperTradingState;
+  //Trading ONLY starts when we know when trading room was created
+  if(tradingRoomUtcStartTime){
+    paperTradingState = PAPER_TRADING_STATES.STARTED;
+  } else{
+    paperTradingState = PAPER_TRADING_STATES.NOT_STARTED;
+  }
 
   //Initialize candlestick chart
   useEffect(()=>{
@@ -84,13 +93,15 @@ const ChartContainer = ({}) => {
     let simulateFuncInterval = null;
 
     if(paperTradingState == PAPER_TRADING_STATES.STARTED){
-        
+        //Move forward in future by amount of seconds since trading room started
+        let secsElapsedSinceTradingStart = Math.floor((Date.now().valueOf()-tradingRoomUtcStartTime)/1000);
+        console.log('secsElapsedSinceTradingStart', secsElapsedSinceTradingStart, tradingRoomUtcStartTime, Date.now().valueOf());
         //Callback loads data into the chart
         const successCallback = (ohlcDataArr) =>{
           curOhlcTradingDataRef.current = fillMissingCandles(ohlcDataArr);
 
-          //prefill 10 mins
-          let curCandleIndex=0;
+          //prefill elapsed time
+          let curCandleIndex=secsElapsedSinceTradingStart;
           for(let i=0;i<curCandleIndex;i++){
             window.candlestickChart.updateLatestCandle(curOhlcTradingDataRef.current[i]);
           }

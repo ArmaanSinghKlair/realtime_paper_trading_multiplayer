@@ -1,6 +1,6 @@
 import React from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { v4 } from "uuid";
+import { createRandomString } from "../../utils/genericUtils";
 
 /**
  * Display tooltip when hover over text.
@@ -10,7 +10,7 @@ import { v4 } from "uuid";
 const TooltipText = ({children, title }) => {
     return (
         <OverlayTrigger  
-            overlay={<Tooltip key={title} id={v4()}>{title}</Tooltip>}>
+            overlay={<Tooltip key={title} id={createRandomString()}>{title}</Tooltip>}>
             {children}
         </OverlayTrigger>
     )

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Button, Container, Form, InputGroup, Nav, Row, Stack, Tab } from "react-bootstrap";
-import TooltipText from "../../components/common/TooltipText";
+import { Button, Container, Form, InputGroup, Stack } from "react-bootstrap";
 import { InfoCircleFill } from "react-bootstrap-icons";
 import { useDispatch } from "react-redux";
+import TooltipText from "../../components/common/TooltipText";
 import { setTradingRoomId } from "../../features/userDetails/userDetailsSlice";
-import { v4 as uuidv4 } from 'uuid';
+import { createRandomString } from "../../utils/genericUtils";
+import { setTradingRoomStartUtcTime } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
 
 const TradingRoomSetupContainer = ({headerHeight}) => {
     const [existingRoomId, setExistingRoomId] = useState('');
@@ -29,7 +30,8 @@ const TradingRoomSetupContainer = ({headerHeight}) => {
        * Creates new trading room with random ID
        */
       const createNewRoomHandler = () =>{
-        storeDispatch(setTradingRoomId(uuidv4()))
+        storeDispatch(setTradingRoomId(createRandomString()))
+        storeDispatch(setTradingRoomStartUtcTime(Date.now().valueOf()));
       }
     return (
         <>

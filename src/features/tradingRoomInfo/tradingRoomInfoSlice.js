@@ -1,8 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { UserInfoSecPos, UserMarketOrder, UserSecPosUtils, UserSecurityPosition } from "../../utils/candlestickChart";
-import { generateMediumIntensityColor } from "../../utils/genericUtils";
+import { createRandomString } from "../../utils/genericUtils";
 import { getCurUserDetails } from "../userDetails/userDetailsSlice";
-import { v4 as uuidv4 } from 'uuid';
 
 /** Inital state && theme reducer */
 let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
@@ -17,6 +16,7 @@ let buyNaman1 = new UserMarketOrder(1, 4110, userNaman.userInfo.userId, UserMark
 UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
 
 const initialState = {
+  tradingRoomUtcStartTime: null,
   userSecurityPos:{
     1: JSON.parse(JSON.stringify(userArmaan)),
     2: JSON.parse(JSON.stringify(userNaman))
@@ -98,19 +98,22 @@ const tradingRoomInfoSlice = createSlice({
       //user added a new chat
       userAddNewGroupChat(state, action){
         state.groupChats.push(action.payload);
+      },
+      setTradingRoomStartUtcTime(state, action){
+        state.tradingRoomUtcStartTime = action.payload;
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { joinTradingRoomCurUser, wsAddUserToTradingRoom, leaveTradingRoomCurUser, wsRemoveUserFromTradingRoom, updateUnrealizedPL, buySecurity, sellSecurity, wsAppendToTradingRoomGroupChat, userAddNewGroupChat } = tradingRoomInfoSlice.actions;
+export const { joinTradingRoomCurUser, wsAddUserToTradingRoom, leaveTradingRoomCurUser, wsRemoveUserFromTradingRoom, updateUnrealizedPL, buySecurity, sellSecurity, wsAppendToTradingRoomGroupChat, userAddNewGroupChat, setTradingRoomStartUtcTime } = tradingRoomInfoSlice.actions;
 
 //Selector
 export const getTradingRoomInfo = state => state.tradingRoomInfo;
 export const getUserSecurityPositions = state => getTradingRoomInfo(state)?.userSecurityPos;
 export const getTradingRoomUsersInfo = state => getTradingRoomInfo(state).userDetails;
 export const getTradingRoomGroupChats = (state) => getTradingRoomInfo(state).groupChats;
-
+export const getTradingRoomUtcStartTime = (state) => getTradingRoomInfo(state).tradingRoomUtcStartTime;
 /**
  * Redux async thunk for selling security.
  * Updates redux state AND updates the candleslick chart as well.
@@ -178,7 +181,7 @@ export const userAddNewGroupChatAsync = (msg) => (dispatch, getState) =>{
   const curUserDetails = getCurUserDetails(getState());
   dispatch(userAddNewGroupChat({
     userId: curUserDetails.userId,
-    msgId: uuidv4(),
+    msgId: createRandomString(),
     message: msg,
     timestamp: new Date().valueOf()
   }));

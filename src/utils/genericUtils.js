@@ -1,6 +1,18 @@
 import Papa from 'papaparse';
 
 /**
+ * @returns 50 char long random string
+ */
+export const createRandomString = (strLen = 50) => {
+  const allPossibleCharacters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let randStr = '';
+  for(let i=0; i < strLen; i++){
+      randStr += allPossibleCharacters.charAt(Math.ceil(Math.random() * (allPossibleCharacters.length-1)));
+  }
+  return randStr;
+}
+
+/**
  * Throttles function calls to timesPerSecond. Silently ignores overlimit function calls
  * @param {T} func 
  * @param {*} timesPerSecond 
@@ -141,7 +153,7 @@ export const fillMissingCandles = ohlcDataArr =>{
       minsFilledArr.push(currentCandle);
       prevMinCandle = currentCandle;
   }
-// console.log(minsFilledArr[0])
+
   //===============================================================================================================================================
   //Finally, simulate seconds. Does a linear interpolation of prices from OPEN -> HIGH -> LOW -> CLOSE. Eveything changes except 'open' price point.
   //===============================================================================================================================================
@@ -157,10 +169,6 @@ export const fillMissingCandles = ohlcDataArr =>{
     let curLow = curClose;
     let isPriceDec=false; //help in simulating prices going up to high -> down to low -> back up to close
 
-    //////////////////TEST
-    if(i==1){
-      // console.log('Tot Sec Len', totSecLen, 'perSecChange', perSecChange, curMinsCandle)
-    }
     if(i==0){
       secsFilledArr.push(curMinsCandle);
       continue;

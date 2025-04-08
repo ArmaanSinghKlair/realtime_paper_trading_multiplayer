@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
-import tradingRoomInfoReducer, { getTradingRoomGroupChats, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
+import tradingRoomInfoReducer, { getTradingRoomGroupChats, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
 import tradingSecurityInfoReducer from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import userDetailsReducer, { getCurUserDetails, setUserDetails } from '../features/userDetails/userDetailsSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
@@ -17,7 +17,11 @@ const websocketMiddleware = ({dispatch, getState}) =>{
   let currentlyCatchingUp = false;
   const topicPrevPersistenceMap = new Map();  //store last received msgId for a topicId
   
-  
+  /**
+   * Creates a websocket to https://github.com/ArmaanSinghKlair/realtime-websocket-microservice.git
+   * @param {*} userId 
+   * @returns 
+   */
   const initializeWebsocket = (userId) =>{
     let socket = new WebSocket("ws://127.0.0.1/ws-service/websocket?userId="+userId);
 
@@ -27,9 +31,15 @@ const websocketMiddleware = ({dispatch, getState}) =>{
       WebSocketUtil.setupPingPongLoop(socket);
     };
 
+    /**
+     * Handle messages received over websocket
+     * @param {*} event 
+     * @returns 
+     */
     socket.onmessage = function(event) {
       const userDetails = getCurUserDetails(getState());
       const curTradingGroupMsgs = getTradingRoomGroupChats(getState());
+      const tradingRoomUtcStartTime = getTradingRoomUtcStartTime(getState());
 
       const messageData = JSON.parse(event.data);
       if(messageData.createSubscriberId == userDetails.userId){
@@ -93,6 +103,9 @@ const websocketMiddleware = ({dispatch, getState}) =>{
         switch(messageData.payload.typeCd){
           case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
             dispatch(wsAddUserToTradingRoomAsync(payloadObj))
+            if(!tradingRoomUtcStartTime){
+              dispatch(setTradingRoomStartUtcTime(messageData.createTimeUtcMs));
+            }
             // createCursor(payloadObj.userId, payloadObj.firstName)
           break;
         }
@@ -114,14 +127,19 @@ const websocketMiddleware = ({dispatch, getState}) =>{
     return socket;
   }
 
+  /**
+   * Now listen to action dispatches across the app.
+   * For certain actions, send corresponding WS messages
+   */
   return next => action =>{
     const userDetails = getCurUserDetails(getState());
+    const tradingRoomUtcStartTime = getTradingRoomUtcStartTime(getState());
+
     //TODO: Remove. Only for testing purposes
     if(userDetails.userId && !socket){
       socket = initializeWebsocket(userDetails.userId, dispatch, getState);
     }
 
-    //Send ws message whenever certain actions are dispatched
     switch(action.type){
       case setUserDetails.type:
         let userId = action.payload.userId;
@@ -140,7 +158,10 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           subscriptTopicMsg.createSubscriberId = userDetails.userId;
           subscriptTopicMsg.targetTopicId = userDetails.curTradingRoomId;
           subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
-          
+          //set trading start time as accurate as posssible
+          if(tradingRoomUtcStartTime){
+            subscriptTopicMsg.createTimeUtcMs = tradingRoomUtcStartTime;
+          }
           let msgPayload = new WebSocketMessagePayload();
           msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
           msgPayload.payloadValue = JSON.stringify(action.payload);
@@ -154,7 +175,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
             console.log('leaving curUser trading room!!!');
             //register subscribe to tradingRoom
             let subscriptTopicMsg = new WebSocketMessage();
-            subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
+            subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_UNSUBSCRIBE;
             subscriptTopicMsg.createSubscriberId = userDetails.userId;
             subscriptTopicMsg.targetTopicId = userDetails.curTradingRoomId;
             subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;

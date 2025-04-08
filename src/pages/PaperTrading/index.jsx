@@ -23,7 +23,7 @@ const PaperTrading = ({headerHeight}) => {
   
   useEffect(()=>{
     storeDispatch(joinTradingRoomCurUserAsync(curUserDetails));
-
+    
     return ()=>{
       storeDispatch(leaveTradingRoomCurUserAsync(curUserDetails.userId));
     }
