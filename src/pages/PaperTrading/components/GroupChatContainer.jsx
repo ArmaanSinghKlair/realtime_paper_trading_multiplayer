@@ -53,7 +53,14 @@ const GroupChatContainer = () => {
                   </Stack>);
                 })
               }
-              
+              {
+                (!messages || messages.length==0) && <>
+                  <Stack className="align-items-center pt-3">
+                    <span className="fs-5">No chats yet</span>
+                    <span className="app-fs-sm">Start the conversation!</span>
+                  </Stack>
+                </>
+              }
             </Container>
           </Stack>
           <Form className="mt-auto bg-body-secondary rounded-bottom-4 border px-4 d-flex justify-content-between align-items-center gap-2" style={{height: '15%'}} onSubmit={handleSendChatMsgSubmit}>

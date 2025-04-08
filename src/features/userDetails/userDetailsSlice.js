@@ -3,12 +3,12 @@ import { createRandomString, generateMediumIntensityColor } from "../../utils/ge
 
 /** Inital state && theme reducer */
 const initialState = {
-    // userId: 1,
-    // userFirstName: 'Armaan',
-    // userLastName: 'Klair',
-    // username: 'Ak_47_',
-    // userColor: generateMediumIntensityColor(),
-    // curTradingRoomId: 1,
+    userId: 1,
+    userFirstName: 'Armaan',
+    userLastName: 'Klair',
+    username: 'Ak_47_',
+    userColor: generateMediumIntensityColor(),
+    curTradingRoomId: 1,
 }
 const userDetailsSlice = createSlice({
     name: 'userDetails',
