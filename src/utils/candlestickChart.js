@@ -14,6 +14,7 @@ export class UserMarketOrder{
 
 	quantity;
 	price;
+	userId;
 	placeTime;
 	orderId;
 	status;

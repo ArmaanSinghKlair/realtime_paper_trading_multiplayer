@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
-import tradingRoomInfoReducer, { getTradingRoomGroupChats, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
-import tradingSecurityInfoReducer from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
+import tradingRoomInfoReducer, { buySecurityAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, sellSecurityAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
+import tradingSecurityInfoReducer, { addCurUserMarketOrder, getCurUserMarketOrders } from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import userDetailsReducer, { getCurUserDetails, setUserDetails } from '../features/userDetails/userDetailsSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
+import { UserMarketOrder } from "../utils/candlestickChart";
 
 /**
  * Allows access to websocket 3rd party connection through redux actions using middleware thunk
@@ -40,6 +41,8 @@ const websocketMiddleware = ({dispatch, getState}) =>{
       const userDetails = getCurUserDetails(getState());
       const curTradingGroupMsgs = getTradingRoomGroupChats(getState());
       const tradingRoomUtcStartTime = getTradingRoomUtcStartTime(getState());
+      const curUserMarketOrders = getCurUserMarketOrders(getState());
+      const tradingRoomUserDetails = getTradingRoomUsersInfo(getState());
 
       const messageData = JSON.parse(event.data);
       if(messageData.createSubscriberId == userDetails.userId){
@@ -83,10 +86,31 @@ const websocketMiddleware = ({dispatch, getState}) =>{
               }
             break;
             case WebSocketMessagePayload.TYPE_CD_CHAT_MESSAGE:
-              if(!curTradingGroupMsgs || curTradingGroupMsgs.filter(msg=>msg.msgId == payloadObj.msgId).length==0){
-                dispatch(wsAppendToTradingRoomGroupChat(payloadObj))
+              //avoid double adding
+              if(curTradingGroupMsgs && curTradingGroupMsgs.filter(msg=>msg.msgId == payloadObj.msgId).length > 0){
+                break;
               }
+
+              dispatch(wsAppendToTradingRoomGroupChat(payloadObj))
             break;
+            case WebSocketMessagePayload.TYPE_CD_USER_ADDED_MARKET_ORDER:
+              //avoid double adding
+              if(curUserMarketOrders && curUserMarketOrders.filter(order=>order.orderId == payloadObj.orderId).length > 0){
+                break;
+              }
+
+              let marketOrder = payloadObj;
+              //If market order reached here, its already been validation against user's available funds. 
+              //Just dummy execute the trade here
+              let isBuyOrder = marketOrder.orderSide == UserMarketOrder.ORDER_SIDE_TYPE.BUY;
+              // console.log('got user added marked order from others', payloadObj, 'isBuyOrder ',isBuyOrder);
+
+              if(isBuyOrder){
+                dispatch(buySecurityAsync(marketOrder));
+              } else{
+                dispatch(sellSecurityAsync(marketOrder));
+              }
+              break;
           }
         break;
         case WebSocketMessage.TYPE_CD_PONG:
@@ -102,6 +126,11 @@ const websocketMiddleware = ({dispatch, getState}) =>{
 
         switch(messageData.payload.typeCd){
           case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
+            //avoid double adding
+            if(tradingRoomUserDetails[payloadObj.userId]){
+              break;
+            }
+
             dispatch(wsAddUserToTradingRoomAsync(payloadObj))
             if(!tradingRoomUtcStartTime){
               dispatch(setTradingRoomStartUtcTime(messageData.createTimeUtcMs));
@@ -117,7 +146,12 @@ const websocketMiddleware = ({dispatch, getState}) =>{
 
           switch(messageData.payload.typeCd){
             case WebSocketMessagePayload.TYPE_CD_USER_DISCONNECTED:
-              dispatch(wsRemoveUserFromTradingRoomAsync(payloadObj))
+              //avoid double removing
+              if(!tradingRoomUserDetails[payloadObj.userId]){
+                break;
+              }
+
+              dispatch(wsRemoveUserFromTradingRoomAsync(payloadObj.userId))
               // removeCursor(payloadObj.userId);
               break;
           }
@@ -151,7 +185,6 @@ const websocketMiddleware = ({dispatch, getState}) =>{
       case joinTradingRoomCurUser.type:
         //Triggered when user JOINS a trading room
         {
-          console.log('joing curUser trading room!!!');
           //register subscribe to tradingRoom
           let subscriptTopicMsg = new WebSocketMessage();
           subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
@@ -172,7 +205,6 @@ const websocketMiddleware = ({dispatch, getState}) =>{
         case leaveTradingRoomCurUser.type:
           //Triggered when user LEAVES a trading room
           {
-            console.log('leaving curUser trading room!!!');
             //register subscribe to tradingRoom
             let subscriptTopicMsg = new WebSocketMessage();
             subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_UNSUBSCRIBE;
@@ -202,6 +234,25 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           WebSocketUtil.sendMessage(socket, chatMsg);
         }
         break;
+      case addCurUserMarketOrder.type:
+        let marketOrder = action.payload;
+        console.log('trying to send market order to others...', marketOrder);
+        //tell others you did something
+        if(marketOrder.status == UserMarketOrder.ORDER_STATUS_TYPE.FILLED){
+          let newMarketOrderMsg = new WebSocketMessage();
+          newMarketOrderMsg.typeCd = WebSocketMessage.TYPE_CD_PUBLISH;
+          newMarketOrderMsg.createSubscriberId = userDetails.userId;
+          newMarketOrderMsg.targetTopicId = userDetails.curTradingRoomId;
+          newMarketOrderMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
+          
+          let msgPayload = new WebSocketMessagePayload();
+          msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_ADDED_MARKET_ORDER;
+          msgPayload.payloadValue = JSON.stringify(action.payload);
+          newMarketOrderMsg.payload = msgPayload;
+          WebSocketUtil.sendMessage(socket, newMarketOrderMsg);
+        }
+        break;
+      
     }
     
 

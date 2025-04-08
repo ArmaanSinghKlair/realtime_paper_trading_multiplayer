@@ -18,17 +18,17 @@ UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
 const initialState = {
   tradingRoomUtcStartTime: null,
   userSecurityPos:{
-    1: JSON.parse(JSON.stringify(userArmaan)),
-    2: JSON.parse(JSON.stringify(userNaman))
+    // 1: JSON.parse(JSON.stringify(userArmaan)),
+    // 2: JSON.parse(JSON.stringify(userNaman))
   },
   userDetails: {
-    2: {
-      userId: 2,
-      userFirstName: 'Naman',
-      userLastName: 'Rana',
-      username: 'nr_256',
-      userColor: 'darkgreen',
-    }
+    // 2: {
+    //   userId: 2,
+    //   userFirstName: 'Naman',
+    //   userLastName: 'Rana',
+    //   username: 'nr_256',
+    //   userColor: 'darkgreen',
+    // }
   },
   groupChats:[
     // {
@@ -69,13 +69,13 @@ const tradingRoomInfoSlice = createSlice({
       },
       leaveTradingRoomCurUser(state, action){
         const userId = action.payload;
-        state.userSecurityPos[userId] = null;
-        state.userDetails[userId] = null;
+        delete state.userSecurityPos[userId];
+        delete state.userDetails[userId];
       },
       wsRemoveUserFromTradingRoom(state, action){
         const userId = action.payload;
-        state.userSecurityPos[userId] = null;
-        state.userDetails[userId] = null;
+        delete state.userSecurityPos[userId];
+        delete state.userDetails[userId];
       },
       updateUnrealizedPL(state, action){
         let latestPrice = action.payload;
@@ -155,9 +155,9 @@ export const wsRemoveUserFromTradingRoomAsync = (userId) => (dispatch, getState)
  * @param {*} userMarketOrder UserMarketOrder
  * @returns 
  */
-export const buySecurityAsync = (chart, userMarketOrder) => (dispatch, getState) =>{
+export const buySecurityAsync = (userMarketOrder) => (dispatch, getState) =>{
   dispatch(buySecurity(userMarketOrder));
-  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
+  window.candlestickChart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**
@@ -167,9 +167,9 @@ export const buySecurityAsync = (chart, userMarketOrder) => (dispatch, getState)
  * @param {*} userMarketOrder UserMarketOrder
  * @returns 
  */
-export const sellSecurityAsync = (chart, userMarketOrder) => (dispatch, getState) =>{
+export const sellSecurityAsync = (userMarketOrder) => (dispatch, getState) =>{
   dispatch(sellSecurity(userMarketOrder));
-  chart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
+  window.candlestickChart.updateUserSecPos(getUserSecurityPositions(getState())); //updated state here
 }
 
 /**

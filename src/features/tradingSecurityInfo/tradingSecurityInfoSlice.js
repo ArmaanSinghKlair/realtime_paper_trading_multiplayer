@@ -48,6 +48,7 @@ export const updateChartLatestCandleAsync = (chart, candle) => (dispatch, getSta
 
 /** Export all SELECTOR FUNCTIONS (only 1 in this case but still helpful) */
 export const getTradingSecurityInfo = state => state.tradingSecurityInfo;
+export const getCurUserMarketOrders = state => getTradingSecurityInfo(state).curUserMarketOrders;
 
   // Export the generated reducer function
 export default tradingSecurityInfoSlice.reducer;

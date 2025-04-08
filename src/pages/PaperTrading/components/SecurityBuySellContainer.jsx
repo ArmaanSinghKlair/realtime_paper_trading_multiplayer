@@ -56,9 +56,9 @@ const SecurityBuySellContainer = () => {
       marketOrder.status = UserMarketOrder.ORDER_STATUS_TYPE.REJECTED;
     } else {
       if(isBuyOrder){
-        storeDispatch(buySecurityAsync(window.candlestickChart, JSON.parse(JSON.stringify(marketOrder))));
+        storeDispatch(buySecurityAsync(JSON.parse(JSON.stringify(marketOrder))));
       } else {
-        storeDispatch(sellSecurityAsync(window.candlestickChart, JSON.parse(JSON.stringify(marketOrder))));
+        storeDispatch(sellSecurityAsync(JSON.parse(JSON.stringify(marketOrder))));
       }
     }
     storeDispatch(addCurUserMarketOrder(JSON.parse(JSON.stringify(marketOrder)))); 
