@@ -93,7 +93,6 @@ const tradingRoomInfoSlice = createSlice({
         let userInfo = new UserInfoSecPos(userId, username, userFirstName, userLastName, userColor);
         state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfo)));
         state.userDetails[userId] = action.payload;
-        state.tradingRoomCursorPositions[userId] = {x: 0, y: 0};
       },
       wsAddUserToTradingRoom(state, action){
         const {userId, username, userFirstName, userLastName, userColor} = action.payload;
