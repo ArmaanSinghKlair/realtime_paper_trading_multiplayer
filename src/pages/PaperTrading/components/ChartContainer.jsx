@@ -15,6 +15,14 @@ const PAPER_TRADING_STATES = {
   STARTED: 'STARTED',
   FINISHED: 'FINISHED'
 }
+
+/**
+ * Main chart container component.
+ * This component is responsible for rendering the candlestick chart and handling user interactions.
+ * It also manages the chart theme and user security positions.
+ * @param {*} param0 
+ * @returns 
+ */
 const ChartContainer = ({}) => {
   const curOhlcTradingDataRef = useRef(null);
 

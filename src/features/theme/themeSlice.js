@@ -10,6 +10,11 @@ export const THEME_SLICE_VALUES = {
 const initialState = {
     currentTheme: localStorage.getItem(LOCAL_CACHE_THEME_SLICE_KEY) || THEME_SLICE_VALUES.DARK
 }
+
+/**
+ * Theme slice reducer
+ * - Handles theme related state and actions
+ */
 const themeSlice = createSlice({
     name: 'theme',
     initialState,

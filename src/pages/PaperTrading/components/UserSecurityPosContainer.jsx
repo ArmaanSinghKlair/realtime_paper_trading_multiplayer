@@ -11,6 +11,13 @@ import { ICON_SMALL_SIZE } from '../../../styles/constants';
 import { UserSecPosUtils } from '../../../utils/candlestickChart';
 import SecuritySummaryTab from './SecuritySummaryTab';
 
+/**
+ * UserSecurityPosContainer component.
+ * This component displays the user's current security positions and account summary.
+ * It shows the account balance, equity, realized P&L, unrealized P&L, and available funds.
+ * It also displays the user's name and trading activity icon.
+ * @returns 
+ */
 export const UserSecurityPosContainer = () => {
     const {userFirstName, userLastName, userColor} = useSelector(state => state.userDetails);
     const curUserDetails = useSelector(getCurUserDetails);

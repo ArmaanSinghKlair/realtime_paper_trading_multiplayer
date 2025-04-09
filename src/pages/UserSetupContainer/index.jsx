@@ -3,6 +3,13 @@ import { Button, Container, Form, Stack } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { setUserDetails } from "../../features/userDetails/userDetailsSlice";
 
+/**
+ * User setup container component.
+ * This component handles the user setup process, allowing users to enter their username, first name, and last name.
+ * It also dispatches the user details to the Redux store.
+ * @param {*} param0 
+ * @returns 
+ */
 function UserSetupContainer({headerHeight}) {
   const storeDispatch = useDispatch();
 

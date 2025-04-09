@@ -13,6 +13,14 @@ const BUY_SELL_TAB_STATE = {
   BUY: "BUY",
   SELL: "SELL"
 }
+
+/**
+ * SecurityBuySellContainer component.
+ * This component handles the buy/sell functionality for the security in the trading room.
+ * It allows users to enter the number of units they want to buy/sell and displays the current price.
+ * It also validates the input and shows an error message if the specified value is less than the instrument minimum.
+ * @returns 
+ */
 const SecurityBuySellContainer = () => {
   const userSecPosObj = useSelector(getTradingSecurityInfo);
   const tradingRoomInfo = useSelector(getTradingRoomInfo);

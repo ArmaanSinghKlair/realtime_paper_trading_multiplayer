@@ -9,6 +9,13 @@ import { ICON_SMALL_SIZE } from "../../../styles/constants";
 import CopyTextIcon from "./CopyTextIcon";
 import ThemeToggle from './ThemeToggle';
 
+/**
+ * Header component.
+ * This component displays the header of the application, including the app name, theme toggle, and user profile icon.
+ * It also shows the trading room ID if the user is in a trading room.
+ * @param {number} headerHeight - Height of the header in vh.
+ * @returns 
+ */
 const Header = ({headerHeight}) => {
     const currentTheme = useSelector(getCurrentTheme);
     const curUserDetailsInfo = useSelector(getCurUserDetails);

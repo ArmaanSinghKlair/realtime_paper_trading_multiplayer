@@ -9,7 +9,16 @@ import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
 import TradingRoomNotificationContainer from "./components/TradingRoomNotificationContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
+import MousePointersContainer from "./components/MousePointersContainer";
 
+/**
+ * This is the main component for the Paper Trading page.
+ * It contains the layout and structure of the page, including the chart, user security positions, buy/sell panel, and group chat.
+ * It also handles the joining and leaving of the trading room for the current user.
+ * The component uses Redux for state management and Bootstrap for styling.
+ * @param {*} param0 
+ * @returns 
+ */
 const PaperTrading = ({headerHeight}) => {
   const storeDispatch = useDispatch();
   const curUserDetails = useSelector(getCurUserDetails);
@@ -21,6 +30,9 @@ const PaperTrading = ({headerHeight}) => {
   const buySellPanelHeightPer = 40;
   const chatPanelHeightPer = 100-buySellPanelHeightPer;
   
+  /**
+   * Update others in trading group.
+   */
   useEffect(()=>{
     storeDispatch(joinTradingRoomCurUserAsync(curUserDetails));
     
@@ -28,6 +40,7 @@ const PaperTrading = ({headerHeight}) => {
       storeDispatch(leaveTradingRoomCurUserAsync(curUserDetails.userId));
     }
   }, []);
+
   return <>
         {/** Entire Body below header */}
         <Container fluid style={{height:bodyHeight+"vh"}} className="py-1">
@@ -74,6 +87,7 @@ const PaperTrading = ({headerHeight}) => {
         </Container>
         <OrderNotificationContainer notificationTitle="Your market orders" />
         <TradingRoomNotificationContainer notificationTitle='Trading room activity' />
+        <MousePointersContainer />
   </>;
 };
 

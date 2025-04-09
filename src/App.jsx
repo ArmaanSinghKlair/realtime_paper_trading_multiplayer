@@ -1,13 +1,13 @@
+import { Container } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import '../src/styles/appTheme.scss';
 import AppThemeLoad from "./features/theme/AppThemeLoad";
+import { getCurrentTheme } from './features/theme/themeSlice';
 import { getCurUserDetails } from './features/userDetails/userDetailsSlice';
 import PaperTrading from "./pages/PaperTrading";
-import UserSetupContainer from './pages/UserSetupContainer';
-import TradingRoomSetupContainer from './pages/TradingRoomSetup';
-import { getCurrentTheme } from './features/theme/themeSlice';
-import { Container } from 'react-bootstrap';
 import Header from './pages/PaperTrading/components/Header';
+import TradingRoomSetupContainer from './pages/TradingRoomSetup';
+import UserSetupContainer from './pages/UserSetupContainer';
 
 const APP_USER_STATES = {
   USER_LOGIN_MISSING: 'USER_LOGIN_REQUIRED',

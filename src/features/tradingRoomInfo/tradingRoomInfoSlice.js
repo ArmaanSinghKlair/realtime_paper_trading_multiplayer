@@ -69,8 +69,21 @@ const initialState = {
     ],
     tradingRoomNotifications: [
       // JSON.parse(JSON.stringify(subscriptTopicMsg))
-    ]
+    ],
+    tradingRoomCursorPositions:{
+      2:{
+        x:20,
+        y: 20
+      }
+    }
 }
+
+/**
+ * Trading Room Info slice
+ * This slice contains all the information related to the trading room.
+ * It contains the user security positions, group chats, and trading room notifications.
+ * It also contains the user details and trading room start time.
+ */
 const tradingRoomInfoSlice = createSlice({
     name: 'tradingRoomInfo',
     initialState,
@@ -80,22 +93,26 @@ const tradingRoomInfoSlice = createSlice({
         let userInfo = new UserInfoSecPos(userId, username, userFirstName, userLastName, userColor);
         state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfo)));
         state.userDetails[userId] = action.payload;
+        state.tradingRoomCursorPositions[userId] = {x: 0, y: 0};
       },
       wsAddUserToTradingRoom(state, action){
         const {userId, username, userFirstName, userLastName, userColor} = action.payload;
         let userInfo = new UserInfoSecPos(userId, username, userFirstName, userLastName, userColor);
         state.userSecurityPos[userId] = JSON.parse(JSON.stringify(new UserSecurityPosition(userInfo)));
         state.userDetails[userId] = action.payload;
+        state.tradingRoomCursorPositions[userId] = {x: 0, y: 0};
       },
       leaveTradingRoomCurUser(state, action){
         const userId = action.payload;
         delete state.userSecurityPos[userId];
         delete state.userDetails[userId];
+        delete state.tradingRoomCursorPositions[userId];
       },
       wsRemoveUserFromTradingRoom(state, action){
         const userId = action.payload;
         delete state.userSecurityPos[userId];
         delete state.userDetails[userId];
+        delete state.tradingRoomCursorPositions[userId];
       },
       updateUnrealizedPL(state, action){
         let latestPrice = action.payload;
@@ -127,12 +144,30 @@ const tradingRoomInfoSlice = createSlice({
       },
       dequeTradingRoomNotification(state, action){
         state.tradingRoomNotifications.shift();
+      },
+      updateMouseCoordinates(state, action){
+        const {userId, x, y} = action.payload;
+        state.tradingRoomCursorPositions[userId].x = x;
+        state.tradingRoomCursorPositions[userId].y = y;
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { joinTradingRoomCurUser, wsAddUserToTradingRoom, leaveTradingRoomCurUser, wsRemoveUserFromTradingRoom, updateUnrealizedPL, buySecurity, sellSecurity, wsAppendToTradingRoomGroupChat, userAddNewGroupChat, setTradingRoomStartUtcTime, wsAppendTradingRoomNotification, unshiftTradingRoomNotification, dequeTradingRoomNotification } = tradingRoomInfoSlice.actions;
+export const { joinTradingRoomCurUser,
+                wsAddUserToTradingRoom,
+                leaveTradingRoomCurUser,
+                wsRemoveUserFromTradingRoom,
+                updateUnrealizedPL,
+                buySecurity,
+                sellSecurity,
+                wsAppendToTradingRoomGroupChat,
+                userAddNewGroupChat,
+                setTradingRoomStartUtcTime,
+                wsAppendTradingRoomNotification,
+                unshiftTradingRoomNotification,
+                dequeTradingRoomNotification,
+                updateMouseCoordinates } = tradingRoomInfoSlice.actions;
 
 //Selector
 export const getTradingRoomInfo = state => state.tradingRoomInfo;
@@ -141,6 +176,7 @@ export const getTradingRoomUsersInfo = state => getTradingRoomInfo(state).userDe
 export const getTradingRoomGroupChats = state => getTradingRoomInfo(state).groupChats;
 export const getTradingRoomUtcStartTime = state => getTradingRoomInfo(state).tradingRoomUtcStartTime;
 export const getTradingRoomNotifications = state => getTradingRoomInfo(state).tradingRoomNotifications;
+export const getTradingRoomCursorPositions = state => getTradingRoomInfo(state).tradingRoomCursorPositions;
 
 /**
  * Redux async thunk for selling security.

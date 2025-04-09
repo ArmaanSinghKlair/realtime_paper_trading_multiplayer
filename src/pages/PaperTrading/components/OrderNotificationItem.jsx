@@ -8,6 +8,14 @@ import { useSelector } from "react-redux";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 import QuantityNumberFormattter from "../../../components/common/QuantityNumberFormattter";
 
+/**
+ * OrderNotificationItem component.
+ * This component displays the order notification item in the trading room.
+ * It shows the order status, symbol, quantity, and price.
+ * It also displays a check or exclamation icon based on the order status.
+ * @param {*} param0 
+ * @returns 
+ */
 const OrderNotificationItem = ({order}) => {
     const userSecPosObj = useSelector(getTradingSecurityInfo);
     return <Stack direction="horizontal" gap={3} className="mb-1">

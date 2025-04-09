@@ -31,7 +31,7 @@ export class WebSocketMessage{
 	constructor(){
 		this.createTimeUtcMs = Date.now();
 		this.timezoneOffsetMins = new Date().getTimezoneOffset();
-		this.persistentMsgCd = 0; 
+		this.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_NO; 
 	}
 }
 
@@ -93,4 +93,8 @@ export class WebSocketUtil {
 	}
 } 
 
-
+/**
+ * Number of mouse updates to send per second for user.
+ * Don't want to send unneccesary payloads and overload the server.
+ */
+export const MOUSE_UPDATES_PER_SECOND = 70;

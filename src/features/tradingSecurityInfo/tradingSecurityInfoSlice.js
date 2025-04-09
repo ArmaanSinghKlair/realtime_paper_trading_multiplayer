@@ -13,6 +13,7 @@ const initialState = {
 
 /**
  * Represents the security that will be traded by users on this platform
+ * - Handles security related state and actions
  */
 const tradingSecurityInfoSlice = createSlice({
     name: 'tradingSecurityInfo',

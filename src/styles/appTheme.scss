@@ -135,3 +135,27 @@ body{
   min-height: $icon_large_size !important;
   min-width: $icon_large_size !important;
 }
+
+.cursor-indicator {
+  position: absolute;
+  pointer-events: none;
+  transition: transform 0.1s ease-out;
+}
+
+.cursor-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid;
+  transform: rotateZ(-45deg);
+}
+
+.cursor-name {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #fff;
+  white-space: nowrap;
+  margin-left: .5rem !important;
+}

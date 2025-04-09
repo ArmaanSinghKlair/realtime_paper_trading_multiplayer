@@ -6,6 +6,12 @@ import { userAddNewGroupChatAsync, getTradingRoomGroupChats, getTradingRoomUsers
 import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlice";
 import { ICON_SMALL_SIZE } from "../../../styles/constants";
 
+/**
+ * Group chat container component.
+ * This component handles the group chat functionality in the trading room.
+ * It allows users to send and receive messages in the chat.
+ * @returns 
+ */
 const GroupChatContainer = () => {
   const curUserDetails = useSelector(getCurUserDetails);
   const tradingRoomUserDetails = useSelector(getTradingRoomUsersInfo);

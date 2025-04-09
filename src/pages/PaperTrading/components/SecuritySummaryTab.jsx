@@ -4,6 +4,11 @@ import { SECURITY_SUMMARY_TAB_KEYS } from "../../../styles/constants";
 import SecuritySummaryOrderTab from "./SecuritySummaryOrderTab";
 import UserSecPosTable from "./UserSecPosTable";
 
+/**
+ * SecuritySummaryTab component.
+ * This component renders a tabbed interface for displaying security summary information.
+ * @returns {JSX.Element}
+ */
 const SecuritySummaryTab = () => {
   return <Tab.Container defaultActiveKey={SECURITY_SUMMARY_TAB_KEYS.POSITION} >
           <Nav variant='pills' className="pb-2 border-bottom">

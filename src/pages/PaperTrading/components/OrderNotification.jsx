@@ -5,6 +5,14 @@ import { useImmer } from "use-immer";
 import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import OrderNotificationItem from "./OrderNotificationItem";
 
+/**
+ * OrderNotificationContainer component.
+ * This component is responsible for displaying notifications for pending orders.
+ * It uses the useImmer hook to manage the state of pending orders.
+ * The component listens for changes in the current user's market orders and updates the notification accordingly.
+ * @param {*} param0 
+ * @returns 
+ */
 const OrderNotificationContainer = ({notificationTitle='Notifications'}) => {
     const [pendingOrders, setPendingOrders] = useImmer([]);
     const [showNotif, setShowNotif] = useState(true);

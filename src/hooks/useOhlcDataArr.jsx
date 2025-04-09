@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Papa from 'papaparse';
 
 /**
- * 
- * @returns Ohlc data for security
+ * Custom hook to fetch and parse OHLC data from a CSV file.
+ * @returns {Array} ohlcDataArr - Array of OHLC data objects parsed from the CSV file.
  */
 const useOhlcDataArr = () => {
   const [ohlcDataArr, setOhlcDataArr] = useState(null);

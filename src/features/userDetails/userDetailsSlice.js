@@ -10,6 +10,11 @@ const initialState = {
     // userColor: generateMediumIntensityColor(),
     // curTradingRoomId: 1,
 }
+
+/**
+ * User details slice reducer
+ * - Handles user details related state and actions
+ */
 const userDetailsSlice = createSlice({
     name: 'userDetails',
     initialState,

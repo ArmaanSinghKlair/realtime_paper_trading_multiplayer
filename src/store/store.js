@@ -1,14 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
-import tradingRoomInfoReducer, { buySecurityAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, sellSecurityAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsAppendTradingRoomNotification, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
+import tradingRoomInfoReducer, { buySecurityAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, sellSecurityAsync, setTradingRoomStartUtcTime, updateMouseCoordinates, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsAppendTradingRoomNotification, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
 import tradingSecurityInfoReducer, { addCurUserMarketOrder, getCurUserMarketOrders } from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import userDetailsReducer, { getCurUserDetails, setUserDetails } from '../features/userDetails/userDetailsSlice';
-import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
 import { UserMarketOrder } from "../utils/candlestickChart";
+import { throttleFunction } from "../utils/genericUtils";
+import { MOUSE_UPDATES_PER_SECOND, WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
 
 /**
- * Allows access to websocket 3rd party connection through redux actions using middleware thunk
- * Assumes user to be already setup.
+ * Websocket middleware for redux store
+ * This middleware thunk handles all websocket related actions and messages.
+ * It listens to actions dispatched across the app and sends corresponding websocket messages.
+ * It also handles incoming websocket messages and updates the redux store accordingly.
+ * 
  * @param {*} param0 
  * @returns 
  */
@@ -17,7 +21,30 @@ const websocketMiddleware = ({dispatch, getState}) =>{
   let lastServerPongTime = null;
   let currentlyCatchingUp = false;
   const topicPrevPersistenceMap = new Map();  //store last received msgId for a topicId
-  
+  let throttledMouseMove = null;
+
+  /**
+       * Braodcasts user's mouse movements
+       * @param {*} event 
+       */
+  const sendMouseCoordinates = (event) => {  
+    const userDetails = getCurUserDetails(getState());
+    let mouseCoordMsg = new WebSocketMessage();
+    mouseCoordMsg.typeCd = WebSocketMessage.TYPE_CD_PUBLISH;
+    mouseCoordMsg.createSubscriberId = userDetails.userId;
+    mouseCoordMsg.targetTopicId = userDetails.curTradingRoomId;
+    
+    //actual coordinates
+    let x = event.clientX;
+    let y = event.clientY;
+    let msgPayload = new WebSocketMessagePayload();
+    msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_MOUSE_COORDINATES;
+    msgPayload.payloadValue = JSON.stringify({ x: x, y: y, userId: userDetails.userId});
+    
+    mouseCoordMsg.payload = msgPayload;
+    WebSocketUtil.sendMessage(socket, mouseCoordMsg);
+  }
+
   /**
    * Creates a websocket to https://github.com/ArmaanSinghKlair/realtime-websocket-microservice.git
    * @param {*} userId 
@@ -45,9 +72,6 @@ const websocketMiddleware = ({dispatch, getState}) =>{
       const tradingRoomUserDetails = getTradingRoomUsersInfo(getState());
 
       const messageData = JSON.parse(event.data);
-      if(messageData.createSubscriberId == userDetails.userId){
-        // return;	//ignore messages created by myself. These messages may be useful in missed messages catchup
-      }
       let payloadObj = null;
       if(messageData?.payload?.payloadValue){
         payloadObj = JSON.parse(messageData.payload.payloadValue);
@@ -82,7 +106,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           switch(messageData.payload.typeCd){
             case WebSocketMessagePayload.TYPE_CD_MOUSE_COORDINATES:
               if(messageData.createSubscriberId != userDetails.userId){
-                //moveCursor(payloadObj.userId, payloadObj.x, payloadObj.y);              
+                dispatch(updateMouseCoordinates(payloadObj));        
               }
             break;
             case WebSocketMessagePayload.TYPE_CD_CHAT_MESSAGE:
@@ -214,6 +238,11 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           msgPayload.payloadValue = JSON.stringify(action.payload);
           subscriptTopicMsg.payload = msgPayload;
           WebSocketUtil.sendMessage(socket, subscriptTopicMsg);
+
+          //start broadcasting user's mouse movements
+          // Throttle the mousemove event to MOUSE_UPDATES_PER_SECOND times per second
+          throttledMouseMove = throttleFunction(sendMouseCoordinates, MOUSE_UPDATES_PER_SECOND);
+          document.addEventListener("mousemove", throttledMouseMove);
         }
         break;
         case leaveTradingRoomCurUser.type:
@@ -231,6 +260,9 @@ const websocketMiddleware = ({dispatch, getState}) =>{
             msgPayload.payloadValue = JSON.stringify(action.payload); //userId
             subscriptTopicMsg.payload = msgPayload;
             WebSocketUtil.sendMessage(socket, subscriptTopicMsg);
+
+            //stop broadcasting user's mouse movements
+            document.removeEventListener("mousemove", throttledMouseMove);
           }
           break;
       case userAddNewGroupChat.type:
@@ -275,6 +307,10 @@ const websocketMiddleware = ({dispatch, getState}) =>{
   }
 }
 
+/**
+ * Redux Store
+ * This is the main store for the application. It combines all the reducers and middleware.
+ */
 export const store = configureStore({
   reducer: {
     theme: themeReducer,

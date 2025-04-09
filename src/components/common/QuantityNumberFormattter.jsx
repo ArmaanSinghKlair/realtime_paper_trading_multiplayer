@@ -1,5 +1,11 @@
 import React from 'react';
 
+/**
+ * QuantityNumberFormattter component.
+ * This component formats a number to a string with 2 decimal places.
+ * @param {*} param0 
+ * @returns 
+ */
 const QuantityNumberFormattter = ({ children }) => {
   // Handle non-numeric input
   if (isNaN(children)) return <span>-</span>;

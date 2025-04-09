@@ -4,6 +4,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { dequeTradingRoomNotification, getTradingRoomNotifications } from "../../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import TradingRoomNotificationItem from "./TradingRoomNotificationItem";
 
+/**
+ * TradingRoomNotificationContainer component.
+ * This component is responsible for displaying notifications for trading room events.
+ * It uses the useImmer hook to manage the state of notifications.
+ * The component listens for changes in the trading room notifications and updates the notification accordingly.
+ * @param {*} param0 
+ * @returns 
+ */
 const TradingRoomNotificationContainer = ({notificationTitle='Notifications'}) => {
     const [showNotif, setShowNotif] = useState(true);
     const storeDispatch = useDispatch();

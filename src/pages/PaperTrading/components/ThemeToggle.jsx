@@ -5,6 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentTheme, THEME_SLICE_VALUES, updateThemeAsync } from '../../../features/theme/themeSlice';
 import { ICON_SMALL_SIZE } from '../../../styles/constants';
 
+/**
+ * ThemeToggle component.
+ * This component is responsible for toggling between light and dark themes.
+ * It uses the Redux store to manage the theme state.
+ * The component displays a sun icon for light mode and a moon icon for dark mode.
+ * @param {string} rootElClassName - Additional class name for the root element. 
+ * @returns 
+ */
 const ThemeToggle = ({ rootElClassName='' }) => {
   const currentTheme = useSelector(getCurrentTheme);
   const storeDispatch = useDispatch();

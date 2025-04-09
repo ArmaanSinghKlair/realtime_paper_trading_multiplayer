@@ -8,6 +8,11 @@ import { getCurUserDetails } from "../../../features/userDetails/userDetailsSlic
 import { getTradingSecurityInfo } from "../../../features/tradingSecurityInfo/tradingSecurityInfoSlice";
 import { UserSecPosUtils } from "../../../utils/candlestickChart";
 
+/**
+ * UserSecPosTable component.
+ * This component displays the user's current security positions in a table format.
+ * @returns 
+ */
 const UserSecPosTable = () => {
     const userSecPosObj = useSelector(getTradingSecurityInfo);
     const tradingRoomInfo = useSelector(getTradingRoomInfo);

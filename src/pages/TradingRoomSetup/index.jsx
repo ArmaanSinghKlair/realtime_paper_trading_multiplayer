@@ -7,6 +7,12 @@ import { setTradingRoomId } from "../../features/userDetails/userDetailsSlice";
 import { createRandomString } from "../../utils/genericUtils";
 import { setTradingRoomStartUtcTime } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
 
+/**
+ * Trading room setup container component.
+ * This component handles the setup of the trading room, allowing users to create a new room or join an existing one.
+ * @param {*} param0 
+ * @returns 
+ */
 const TradingRoomSetupContainer = ({headerHeight}) => {
     const [existingRoomId, setExistingRoomId] = useState('');
     const storeDispatch = useDispatch();

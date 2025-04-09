@@ -6,6 +6,13 @@ import { SECURITY_ORDER_TAB_KEY } from "../../../styles/constants";
 import { UserMarketOrder } from "../../../utils/candlestickChart";
 import PriceNumberFormatter from "../../../components/common/PriceNumberFormattter";
 
+/**
+ * SecurityOrderTable component.
+ * This component displays the current user market orders in a table format.
+ * It filters the orders based on the order status passed as a prop.
+ * @param {*} param0 
+ * @returns 
+ */
 const SecurityOrderTable = ({orderStatus}) => {
   const userSecPosObj = useSelector(getTradingSecurityInfo);
   let curTabMarketOrders = userSecPosObj.curUserMarketOrders.filter((el)=>el.status==orderStatus || orderStatus == UserMarketOrder.ORDER_STATUS_TYPE.ALL);
