@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import themeReducer from '../features/theme/themeSlice';
-import tradingRoomInfoReducer, { buySecurityAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, sellSecurityAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
+import tradingRoomInfoReducer, { buySecurityAsync, getTradingRoomGroupChats, getTradingRoomUsersInfo, getTradingRoomUtcStartTime, joinTradingRoomCurUser, leaveTradingRoomCurUser, leaveTradingRoomCurUserAsync, sellSecurityAsync, setTradingRoomStartUtcTime, userAddNewGroupChat, wsAddUserToTradingRoomAsync, wsAppendToTradingRoomGroupChat, wsAppendTradingRoomNotification, wsRemoveUserFromTradingRoomAsync } from '../features/tradingRoomInfo/tradingRoomInfoSlice';
 import tradingSecurityInfoReducer, { addCurUserMarketOrder, getCurUserMarketOrders } from '../features/tradingSecurityInfo/tradingSecurityInfoSlice';
 import userDetailsReducer, { getCurUserDetails, setUserDetails } from '../features/userDetails/userDetailsSlice';
 import { WebSocketMessage, WebSocketMessagePayload, WebSocketUtil } from "../utils/webSocketUtils";
@@ -98,7 +98,7 @@ const websocketMiddleware = ({dispatch, getState}) =>{
               if(curUserMarketOrders && curUserMarketOrders.filter(order=>order.orderId == payloadObj.orderId).length > 0){
                 break;
               }
-
+              
               let marketOrder = payloadObj;
               //If market order reached here, its already been validation against user's available funds. 
               //Just dummy execute the trade here
@@ -110,6 +110,13 @@ const websocketMiddleware = ({dispatch, getState}) =>{
               } else{
                 dispatch(sellSecurityAsync(marketOrder));
               }
+
+              //Show Notification to user as well
+              dispatch(wsAppendTradingRoomNotification({
+                ...messageData,
+                //pass user data because we remove data right after this dispatch
+                ...tradingRoomUserDetails[payloadObj.userId]
+                }));
               break;
           }
         break;
@@ -120,24 +127,26 @@ const websocketMiddleware = ({dispatch, getState}) =>{
           currentlyCatchingUp = false;
         break;
         case WebSocketMessage.TYPE_CD_SUBSCRIBE:
-        if(messageData.createSubscriberId == userDetails.userId){
-          break;
-        }
+          if(messageData.createSubscriberId == userDetails.userId){
+            break;
+          }
 
-        switch(messageData.payload.typeCd){
-          case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
-            //avoid double adding
-            if(tradingRoomUserDetails[payloadObj.userId]){
-              break;
-            }
+          switch(messageData.payload.typeCd){
+            case WebSocketMessagePayload.TYPE_CD_USER_CONNECTED:
+              //avoid double adding
+              if(tradingRoomUserDetails[payloadObj.userId]){
+                break;
+              }
 
-            dispatch(wsAddUserToTradingRoomAsync(payloadObj))
-            if(!tradingRoomUtcStartTime){
-              dispatch(setTradingRoomStartUtcTime(messageData.createTimeUtcMs));
-            }
-            // createCursor(payloadObj.userId, payloadObj.firstName)
-          break;
-        }
+              dispatch(wsAddUserToTradingRoomAsync(payloadObj))
+              if(!tradingRoomUtcStartTime){
+                dispatch(setTradingRoomStartUtcTime(messageData.createTimeUtcMs));
+              }
+
+              //Show Notification to user after user added
+              dispatch(wsAppendTradingRoomNotification(messageData));
+            break;
+          }
         break;
         case WebSocketMessage.TYPE_CD_UNSUBSCRIBE:
           if(messageData.createSubscriberId == userDetails.userId){
@@ -150,9 +159,14 @@ const websocketMiddleware = ({dispatch, getState}) =>{
               if(!tradingRoomUserDetails[payloadObj.userId]){
                 break;
               }
-
+              //Show Notification to user as well
+              dispatch(wsAppendTradingRoomNotification({
+                ...messageData,
+                //pass user data because we remove data right after this dispatch
+                ...tradingRoomUserDetails[payloadObj.userId]
+                }));
+              
               dispatch(wsRemoveUserFromTradingRoomAsync(payloadObj.userId))
-              // removeCursor(payloadObj.userId);
               break;
           }
         break;

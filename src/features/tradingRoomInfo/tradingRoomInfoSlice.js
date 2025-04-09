@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { UserInfoSecPos, UserMarketOrder, UserSecPosUtils, UserSecurityPosition } from "../../utils/candlestickChart";
 import { createRandomString } from "../../utils/genericUtils";
 import { getCurUserDetails } from "../userDetails/userDetailsSlice";
+import { WebSocketMessage, WebSocketMessagePayload } from "../../utils/webSocketUtils";
 
 /** Inital state && theme reducer */
 let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
@@ -15,20 +16,36 @@ let buyNaman1 = new UserMarketOrder(1, 4110, userNaman.userInfo.userId, UserMark
 // UserSecPosUtils.sellSecurity(sellArmaan2, userArmaan);
 UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
 
+let subscriptTopicMsg = new WebSocketMessage();
+subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
+subscriptTopicMsg.createSubscriberId = 2;
+subscriptTopicMsg.targetTopicId = 1;
+subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
+subscriptTopicMsg.createTimeUtcMs = new Date().valueOf()
+let msgPayload = new WebSocketMessagePayload();
+msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
+msgPayload.payloadValue = JSON.stringify({
+  typeCd: 2,
+  username: 'nr_256',
+  userId: 2,
+  userFirstName: 'Naman',
+  userLastName: 'Rana'
+});
+subscriptTopicMsg.payload = msgPayload;
 const initialState = {
   tradingRoomUtcStartTime: null,
   userSecurityPos:{
     // 1: JSON.parse(JSON.stringify(userArmaan)),
-    // 2: JSON.parse(JSON.stringify(userNaman))
+    2: JSON.parse(JSON.stringify(userNaman))
   },
   userDetails: {
-    // 2: {
-    //   userId: 2,
-    //   userFirstName: 'Naman',
-    //   userLastName: 'Rana',
-    //   username: 'nr_256',
-    //   userColor: 'darkgreen',
-    // }
+    2: {
+      userId: 2,
+      userFirstName: 'Naman',
+      userLastName: 'Rana',
+      username: 'nr_256',
+      userColor: 'darkgreen',
+    }
   },
   groupChats:[
     // {
@@ -49,6 +66,9 @@ const initialState = {
     //   message: `What strategy we're gonna test today though?`,
     //   timestamp: new Date(Date.now()-(10*60*1000)).valueOf() //x mins ago
     // },
+    ],
+    tradingRoomNotifications: [
+      // JSON.parse(JSON.stringify(subscriptTopicMsg))
     ]
 }
 const tradingRoomInfoSlice = createSlice({
@@ -101,19 +121,27 @@ const tradingRoomInfoSlice = createSlice({
       },
       setTradingRoomStartUtcTime(state, action){
         state.tradingRoomUtcStartTime = action.payload;
+      },
+      wsAppendTradingRoomNotification(state, action){
+        state.tradingRoomNotifications.push(action.payload);
+      },
+      dequeTradingRoomNotification(state, action){
+        state.tradingRoomNotifications.shift();
       }
     }
 });
 
 /** Export all ACTION CREATORS */
-export const { joinTradingRoomCurUser, wsAddUserToTradingRoom, leaveTradingRoomCurUser, wsRemoveUserFromTradingRoom, updateUnrealizedPL, buySecurity, sellSecurity, wsAppendToTradingRoomGroupChat, userAddNewGroupChat, setTradingRoomStartUtcTime } = tradingRoomInfoSlice.actions;
+export const { joinTradingRoomCurUser, wsAddUserToTradingRoom, leaveTradingRoomCurUser, wsRemoveUserFromTradingRoom, updateUnrealizedPL, buySecurity, sellSecurity, wsAppendToTradingRoomGroupChat, userAddNewGroupChat, setTradingRoomStartUtcTime, wsAppendTradingRoomNotification, unshiftTradingRoomNotification, dequeTradingRoomNotification } = tradingRoomInfoSlice.actions;
 
 //Selector
 export const getTradingRoomInfo = state => state.tradingRoomInfo;
 export const getUserSecurityPositions = state => getTradingRoomInfo(state)?.userSecurityPos;
 export const getTradingRoomUsersInfo = state => getTradingRoomInfo(state).userDetails;
-export const getTradingRoomGroupChats = (state) => getTradingRoomInfo(state).groupChats;
-export const getTradingRoomUtcStartTime = (state) => getTradingRoomInfo(state).tradingRoomUtcStartTime;
+export const getTradingRoomGroupChats = state => getTradingRoomInfo(state).groupChats;
+export const getTradingRoomUtcStartTime = state => getTradingRoomInfo(state).tradingRoomUtcStartTime;
+export const getTradingRoomNotifications = state => getTradingRoomInfo(state).tradingRoomNotifications;
+
 /**
  * Redux async thunk for selling security.
  * Updates redux state AND updates the candleslick chart as well.

@@ -24,17 +24,14 @@ const OrderNotificationContainer = ({notificationTitle='Notifications'}) => {
         //Clear this notification after sometime also
         setTimeout(()=>{
             setPendingOrders(draft =>{
-                let targetIndex = draft.findIndex(el=>el.orderId==newMarketOrder.orderId);
-                if(targetIndex != -1){
-                    draft.splice(targetIndex,1);  //remove 1st element from array
-                }
+                draft.shift();  //remove 1st element from array
             });
         }, 4000);
     }, [curTabMarketOrders]);
 
     return <>
     {pendingOrders.length > 0 &&
-    <ToastContainer position="bottom-start" className="w-75" style={{ padding: '1rem' }}>
+    <ToastContainer position="bottom-start" style={{ padding: '1rem' }}>
         <Toast show={showNotif} onClose={()=>setShowNotif(!showNotif)} delay={2000}>
             <Toast.Header>
             <strong className="me-auto">{notificationTitle}</strong>

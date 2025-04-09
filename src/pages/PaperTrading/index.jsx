@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { joinTradingRoomCurUserAsync, leaveTradingRoomCurUserAsync } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
 import { getCurUserDetails } from "../../features/userDetails/userDetailsSlice";
 import ChartContainer from "./components/ChartContainer";
 import GroupChatContainer from "./components/GroupChatContainer";
 import OrderNotificationContainer from "./components/OrderNotification";
 import SecurityBuySellContainer from "./components/SecurityBuySellContainer";
+import TradingRoomNotificationContainer from "./components/TradingRoomNotificationContainer";
 import { UserSecurityPosContainer } from "./components/UserSecurityPosContainer";
-import { joinTradingRoomCurUserAsync, leaveTradingRoomCurUserAsync } from "../../features/tradingRoomInfo/tradingRoomInfoSlice";
-import { generateMediumIntensityColor } from "../../utils/genericUtils";
 
 const PaperTrading = ({headerHeight}) => {
   const storeDispatch = useDispatch();
@@ -73,6 +73,7 @@ const PaperTrading = ({headerHeight}) => {
           </Row>
         </Container>
         <OrderNotificationContainer notificationTitle="Your market orders" />
+        <TradingRoomNotificationContainer notificationTitle='Trading room activity' />
   </>;
 };
 
