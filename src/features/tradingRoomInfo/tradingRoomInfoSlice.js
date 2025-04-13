@@ -5,47 +5,47 @@ import { getCurUserDetails } from "../userDetails/userDetailsSlice";
 import { WebSocketMessage, WebSocketMessagePayload } from "../../utils/webSocketUtils";
 
 /** Inital state && theme reducer */
-let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
-let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'darkgreen'));
+// let userArmaan = new UserSecurityPosition(new UserInfoSecPos(1, 'Ak_47_', 'Armaan', 'Klair', 'green'));
+// let userNaman = new UserSecurityPosition(new UserInfoSecPos(2, 'nr_256', 'Naman', 'Rana', 'darkgreen'));
 
-// let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
-// let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
-let buyNaman1 = new UserMarketOrder(1, 4110, userNaman.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
+// // let buyArmaan1 = new UserMarketOrder(1, 430, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.BUY);
+// // let sellArmaan2 = new UserMarketOrder(0.5, 415, userArmaan.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
+// let buyNaman1 = new UserMarketOrder(1, 4110, userNaman.userInfo.userId, UserMarketOrder.ORDER_SIDE_TYPE.SELL);
 
-// UserSecPosUtils.buySecurity(buyArmaan1, userArmaan);
-// UserSecPosUtils.sellSecurity(sellArmaan2, userArmaan);
-UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
+// // UserSecPosUtils.buySecurity(buyArmaan1, userArmaan);
+// // UserSecPosUtils.sellSecurity(sellArmaan2, userArmaan);
+// UserSecPosUtils.sellSecurity(buyNaman1, userNaman);
 
-let subscriptTopicMsg = new WebSocketMessage();
-subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
-subscriptTopicMsg.createSubscriberId = 2;
-subscriptTopicMsg.targetTopicId = 1;
-subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
-subscriptTopicMsg.createTimeUtcMs = new Date().valueOf()
-let msgPayload = new WebSocketMessagePayload();
-msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
-msgPayload.payloadValue = JSON.stringify({
-  typeCd: 2,
-  username: 'nr_256',
-  userId: 2,
-  userFirstName: 'Naman',
-  userLastName: 'Rana'
-});
-subscriptTopicMsg.payload = msgPayload;
+// let subscriptTopicMsg = new WebSocketMessage();
+// subscriptTopicMsg.typeCd = WebSocketMessage.TYPE_CD_SUBSCRIBE;
+// subscriptTopicMsg.createSubscriberId = 2;
+// subscriptTopicMsg.targetTopicId = 1;
+// subscriptTopicMsg.persistentMsgCd = WebSocketMessage.PERSISTENT_MSG_CD_YES;
+// subscriptTopicMsg.createTimeUtcMs = new Date().valueOf()
+// let msgPayload = new WebSocketMessagePayload();
+// msgPayload.typeCd = WebSocketMessagePayload.TYPE_CD_USER_CONNECTED;
+// msgPayload.payloadValue = JSON.stringify({
+//   typeCd: 2,
+//   username: 'nr_256',
+//   userId: 2,
+//   userFirstName: 'Naman',
+//   userLastName: 'Rana'
+// });
+// subscriptTopicMsg.payload = msgPayload;
 const initialState = {
   tradingRoomUtcStartTime: null,
   userSecurityPos:{
     // 1: JSON.parse(JSON.stringify(userArmaan)),
-    2: JSON.parse(JSON.stringify(userNaman))
+    // 2: JSON.parse(JSON.stringify(userNaman))
   },
   userDetails: {
-    2: {
-      userId: 2,
-      userFirstName: 'Naman',
-      userLastName: 'Rana',
-      username: 'nr_256',
-      userColor: 'darkgreen',
-    }
+    // 2: {
+    //   userId: 2,
+    //   userFirstName: 'Naman',
+    //   userLastName: 'Rana',
+    //   username: 'nr_256',
+    //   userColor: 'darkgreen',
+    // }
   },
   groupChats:[
     // {
@@ -71,10 +71,10 @@ const initialState = {
       // JSON.parse(JSON.stringify(subscriptTopicMsg))
     ],
     tradingRoomCursorPositions:{
-      2:{
-        x:20,
-        y: 20
-      }
+      // 2:{
+      //   x:20,
+      //   y: 20
+      // }
     }
 }
 

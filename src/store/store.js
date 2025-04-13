@@ -208,9 +208,9 @@ const websocketMiddleware = ({dispatch, getState}) =>{
     const tradingRoomUtcStartTime = getTradingRoomUtcStartTime(getState());
 
     //TODO: Remove. Only for testing purposes
-    if(userDetails.userId && !socket){
-      socket = initializeWebsocket(userDetails.userId, dispatch, getState);
-    }
+    // if(userDetails.userId && !socket){
+    //   socket = initializeWebsocket(userDetails.userId, dispatch, getState);
+    // }
 
     switch(action.type){
       case setUserDetails.type:
