@@ -66,7 +66,7 @@ export class UserSecurityPosition {
 	realizedPL; // Realized profit/loss
 	userInfo;	//{userId: 1, username: 'ArmaanKlair', firstName: 'Armaan', lastName: 'Klair', color: 'rgba(110,137,90,1)'}	- all fields are guarenteed values.
 	
-	static INITIAL_ACCT_BALANCE = 10000;	//$10,000
+	static INITIAL_ACCT_BALANCE = 100000;	//$100,000
 
 	// candlestickChart;
 	constructor(userInfo){		
