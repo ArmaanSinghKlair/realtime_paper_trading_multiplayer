@@ -10,7 +10,6 @@ import MousePointer from "./MousePointer";
  */
 const MousePointersContainer = () => {
     const mouseCoordinates = useSelector(getTradingRoomCursorPositions)
-    console.log("mouseCoordinates", mouseCoordinates);
     return <>
     {
         Object.keys(mouseCoordinates).map((userId) => {

@@ -6,7 +6,7 @@ const MousePointer = ({coordinates, userId}) => {
   const tradingRoomUserDetails = useSelector(getTradingRoomUsersInfo)
   const { x, y } = coordinates;
   const userInfoObj = tradingRoomUserDetails[userId];
-  console.log("coordinates", coordinates);
+  // console.log("coordinates", coordinates);
 
   return <div className="cursor-indicator"  style={{ left: x, top: y }}>
           <div className="cursor-arrow" style={{borderBottomColor: userInfoObj.userColor}}></div>
