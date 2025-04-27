@@ -1,6 +1,8 @@
 # TraderJam.io - Realtime Paper Trading
-A high-performance, scalable Paper Trading Multiplayer 👥 inspired by TradingView's front-end design and [Canva's mouse-pointer system design](https://www.canva.dev/blog/engineering/realtime-mouse-pointers/) for realtime-communication techniques. 
+A high-performance, scalable Paper Trading Multiplayer 👥 inspired by TradingView's front-end design and [Canva's realtime mouse-pointer architecture](https://www.canva.dev/blog/engineering/realtime-mouse-pointers/), featuring a custom-made HTML Canvas-based candlestick chart and real-time updates with other players’ actions and stats. This project demonstrates a cloud-native, microservices architecture with horizontally scalable components, built to explore cutting-edge technologies and deliver a robust, fault-tolerant trading simulation.
 ![trading_view_screenshot](https://github.com/user-attachments/assets/f0cf6854-855c-465b-8140-24559b274ec7)
+### Project Motivation
+I've always enjoyed exploring new technologies, so when I got into system design, I started reading every newsletter I could find. Canva’s post about their real-time mouse pointer system stood out, inspiring me to build a similar backend for a multiplayer paper trading platform. With trading being such a relevant topic, it felt like a great challenge. I spent late nights sorting out Redis and HAProxy configurations, understanding TradingView’s chart stats, and debugging multi-threading issues. Designing a scalable system from scratch was challenging, but seeing it work seamlessly made the effort rewarding.
 ### System Architecture
 ![image](https://github.com/user-attachments/assets/443982c2-0b18-47b9-ab64-52a6d8ceaca3)
 ---
