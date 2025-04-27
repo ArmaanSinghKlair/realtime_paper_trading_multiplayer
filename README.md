@@ -3,3 +3,6 @@ A high-performance, scalable Paper Trading Multiplayer 👥 inspired by TradingV
 ![trading_view_screenshot](https://github.com/user-attachments/assets/f0cf6854-855c-465b-8140-24559b274ec7)
 ### System Architecture
 ![image](https://github.com/user-attachments/assets/443982c2-0b18-47b9-ab64-52a6d8ceaca3)
+---
+
+⭐ **Star this repo if you find it useful!** ⭐
