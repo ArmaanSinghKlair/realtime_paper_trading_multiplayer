@@ -14,13 +14,20 @@ I've always enjoyed exploring new technologies, so when I got into system design
  - **WebSocket Connection:** After user details are entered in the react app, it creates a WebSocket Connection via send a request to `API Gateway`, which load balances the request to an available `WebSocket Microservice` based on the `Least Connection Algorithm`. 
  - **Sending updates to other players:**  All updates to the trading room are sent via WebSocket messages. Once the message reaches the backend microservice, 2 things happen.
 	 1. **In-Memory Pub-Sub**:  Service routes request in-memory to players currently connected to the trading room on the same microservice instance. This in-memory routing was built in a scalable enough manner via **multi-threaded pub-sub mechanism** I created in Java. **Brief Explanation**:
-
+### Tech Stack
+-   **Backend**: Spring Microservices, WebSocket, Redis (Pub/Sub, Streams), Spring Cloud Netflix Eureka.
+    
+-   **Frontend**: React, React-Router, Redux Toolkit, React Bootstrap, HTML5 Canvas (Custom Candlestick Chart 😉), Nginx
+     
+-   **Infrastructure**: HAProxy, Docker
 ## Backend-centric Architecture
  - 🔗[WebSocket Microservice](https://github.com/ArmaanSinghKlair/realtime-websocket-microservice)
    - A stateless, horizontally scalable microservice built with Spring, WebSockets, and Redis, designed for real-time data streaming and synchronization of trading room interactions. 
    - This microservice features a **custom Pub/Sub Java-implementation** for same-microservice WebSocket communication and **Redis Pub/Sub and Streams** for intra-microservice communication, enabling fast, reliable messaging for actions like market orders, chat, and user updates.
   - 🔗[Load Balancing](https://github.com/ArmaanSinghKlair/realtime-app-docker-config/tree/main/realtime-app-docker-config/haproxy-config)
-	  - HAProxy ensures efficient routing of traffic to backend servers and handles SSL Termination.
+    - HAProxy ensures efficient routing of traffic to backend servers and handles SSL Termination.
+  - 🔗[Service Registry](https://github.com/ArmaanSinghKlair/realtime-websocket-registry)
+    - Registers Websocket Microservices and acts as a central repository using Spring Clould Netflix Eureka.
 
 > ### Scalability  
 > We can scale horizontally the number of WebSocket Microservice instances. When a new backend instance spins up, all new
@@ -35,9 +42,9 @@ I've always enjoyed exploring new technologies, so when I got into system design
 > messages it missed offline. Examples include user's market orders,
 > connections/disconnections. 
 >  - **Low priority messages** use Redis Pub/Sub for transporting low-priority messages quickly with a push-based system.
-## Frontend
-The frontend is a modern single-page-application (SPA) built using **React** and **Redux Toolkit**. It was inspired by TradingView's paper trading platform and is designed for real-time market data visualization and low-latency user interactions.
-
+## Frontend Technologies
+The frontend is a modern single-page-application (SPA) built using **React**, **React-router** and **Redux Toolkit**. It was inspired by TradingView's paper trading platform and is designed for real-time market data visualization and low-latency user interactions.
+### Key Features
 -   **🗠 Custom Candlestick Chart**:
 	- Developed from scratch using **HTML5 Canvas** for high-performance rending for security price and user positions. Inspired by TradingView design.
 	- Supports features like pan for navigation, tracks cursor movement to show current candlestick data, displays user positions and current security price with horizontal render lines.
