@@ -20,7 +20,7 @@ I've always enjoyed exploring new technologies, so when I got into system design
 ## 🏗️ Backend-centric Architecture
  - 🔗[WebSocket Microservice](https://github.com/ArmaanSinghKlair/realtime-websocket-microservice)
    - A stateless, horizontally scalable microservice built with Spring, WebSockets, and Redis, designed for real-time data streaming and synchronization of trading room interactions. 
-   - This microservice features a **custom Pub/Sub Java-implementation** for same-microservice WebSocket communication and **Redis Pub/Sub and Streams** for intra-microservice communication, enabling fast, reliable messaging for actions like market orders, chat, and user updates.
+   - This microservice features a **custom Pub/Sub Java-implementation** for same-microservice WebSocket communication and **Redis Pub/Sub and Streams** for inter-microservice communication, enabling fast, reliable messaging for actions like market orders, chat, and user updates.
   - 🔗[Load Balancing](https://github.com/ArmaanSinghKlair/realtime-app-docker-config/tree/main/realtime-app-docker-config/haproxy-config)
     - HAProxy ensures efficient routing of traffic to backend servers and handles SSL Termination.
   - 🔗[Service Registry](https://github.com/ArmaanSinghKlair/realtime-websocket-registry)
