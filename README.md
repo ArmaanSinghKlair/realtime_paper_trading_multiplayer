@@ -1,4 +1,3 @@
-View Count : ![image](https://profile-counter.glitch.me/ArmaanSinghKlair/count.svg)
 # [🔗TraderJam.online](https://traderjam.online/) - Realtime Paper Trading
 A high-performance, scalable Paper Trading Multiplayer 👥 inspired by TradingView's front-end design and [Canva's realtime mouse-pointer architecture](https://www.canva.dev/blog/engineering/realtime-mouse-pointers/), featuring a custom-made HTML Canvas-based candlestick chart and real-time updates with other players’ actions and stats. This project demonstrates a cloud-native, microservices architecture with horizontally scalable components, built to explore cutting-edge technologies and deliver a robust, fault-tolerant trading simulation.
 ![trading_view_screenshot](https://github.com/user-attachments/assets/f0cf6854-855c-465b-8140-24559b274ec7)
@@ -67,3 +66,4 @@ The frontend is a modern single-page-application (SPA) built using **React**, **
 -   Researched loads of interesting technologies from scratch ie (Redis Pub/Sub & Streams, HAProxy, Docker, HTML Canvas, React Redux Toolkit) and put all the pieces together to form a starting point of an industry ready, highly scalable application.
 
 ⭐ **Star this repo if you find it useful!** ⭐
+View Count : ![image](https://profile-counter.glitch.me/ArmaanSinghKlair/count.svg)
