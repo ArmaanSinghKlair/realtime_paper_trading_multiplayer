@@ -1,6 +1,5 @@
 View Count : ![image](https://profile-counter.glitch.me/ArmaanSinghKlair/count.svg)
-# Traderjam.online - Realtime Paper Trading
-### Check It Out >>> [⚡ TraderJam.online](https://traderjam.online/)
+# [🔗TraderJam.online](https://traderjam.online/) - Realtime Paper Trading
 A high-performance, scalable Paper Trading Multiplayer 👥 inspired by TradingView's front-end design and [Canva's realtime mouse-pointer architecture](https://www.canva.dev/blog/engineering/realtime-mouse-pointers/), featuring a custom-made HTML Canvas-based candlestick chart and real-time updates with other players’ actions and stats. This project demonstrates a cloud-native, microservices architecture with horizontally scalable components, built to explore cutting-edge technologies and deliver a robust, fault-tolerant trading simulation.
 ![trading_view_screenshot](https://github.com/user-attachments/assets/f0cf6854-855c-465b-8140-24559b274ec7)
 ## 💡 Project Motivation
