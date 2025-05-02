@@ -12,11 +12,11 @@ I've always enjoyed exploring new technologies, so when I got into system design
  - **Sending updates to other players:**  All updates to the trading room are sent via WebSocket messages. Once the message reaches the backend microservice, 2 things happen.
 	 1. **In-Memory Pub-Sub**:  Service routes request in-memory to players currently connected to the trading room on the same microservice instance. This in-memory routing was built in a scalable enough manner via **multi-threaded pub-sub mechanism** I created in Java. **Brief Explanation**:
 ### 🛠️ Tech Stack
--   **Backend**: Spring Microservices, WebSocket, Redis (Pub/Sub, Streams), Spring Cloud Netflix Eureka.
+-   **Backend**: Spring Microservices, WebSocket, [Redis](https://github.com/ArmaanSinghKlair/realtime-app-docker-config/tree/main/realtime-app-docker-config/redis-config) (Pub/Sub, Streams), Spring Cloud Netflix Eureka.
     
 -   **Frontend**: React, React-Router, Redux Toolkit, React Bootstrap, HTML5 Canvas (Custom Candlestick Chart 😉), Nginx
      
--   **Infrastructure**: HAProxy, Docker
+-   **Infrastructure**: [HAProxy](https://github.com/ArmaanSinghKlair/realtime-app-docker-config/tree/main/realtime-app-docker-config/haproxy-config), Docker
 ## 🏗️ Backend-centric Architecture
  - 🔗[WebSocket Microservice](https://github.com/ArmaanSinghKlair/realtime-websocket-microservice)
    - A stateless, horizontally scalable microservice built with Spring, WebSockets, and Redis, designed for real-time data streaming and synchronization of trading room interactions. 
